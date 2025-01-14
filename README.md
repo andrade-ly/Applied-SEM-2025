@@ -4,6 +4,7 @@ You can find the R and Mplus codes for the course PSY 768: Applied Structural Eq
 
 Authors:
 R scripts created and annotated by Fernanda C. Andrade, Ph.D., and edited by Jinyoung Park, M.S.
+
 Mplus scripts created and annotated by Erin K. Davisson, Ph.D., and edited by Fernanda C. Andrade, Ph.D.
 
 References:
