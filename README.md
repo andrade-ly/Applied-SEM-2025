@@ -1,3 +1,5 @@
+Welcome to Applied SEM (PSY 768)!
+
 You can find the R and Mplus codes for the course PSY 768: Applied Structural Equation Modeling here. Data files will be available on the Canvas course page.
 
 Authors:
