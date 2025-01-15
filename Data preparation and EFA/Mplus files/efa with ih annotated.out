@@ -15,8 +15,10 @@ INPUT INSTRUCTIONS
 
     USEVAR = IH1 IH2 IH3 IH4 IH5 IH6;
 
+! requests a one factor and two factor solutions;
   ANALYSIS: TYPE = EFA 1 2;
-            ROTATION = OBLIMIN;
+  
+  ROTATION = OBLIMIN; ! Default is GEOMIN
 
 !uses default estimator (ML)
 
@@ -36,21 +38,25 @@ SUMMARY OF ANALYSIS
 
 Number of groups                                                 1
 Number of observations                                         200
+! Number of cases in data
 
 Number of dependent variables                                    6
+! Number of observed variables
 !number of factor indicators
 Number of independent variables                                  0
 Number of continuous latent variables                            0
 
 Observed dependent variables
 !variables that are included in analysis
-
+! Make sure that this matches what you expected
   Continuous
    IH1         IH2         IH3         IH4         IH5         IH6
 
 
 Estimator                                                       ML
+! Estimator used
 Rotation                                                   OBLIMIN
+! Type of rotation, we specified it above
 Row standardization                                    CORRELATION
 Type of rotation                                           OBLIQUE
 Gamma value                                              0.000D+00
@@ -201,13 +207,15 @@ MINIMUM ROTATION FUNCTION VALUE       0.00000
 
 
            OBLIMIN FACTOR CORRELATIONS
+! The correlation between the factors - we have only one so it's 1.000, but
+! would have more if we had 2+ factors.
                   1
               ________
       1         1.000
 
 
            ESTIMATED RESIDUAL VARIANCES
-!variances of observed values after account for all the variance in EFA model
+!variances of observed values after accounting for all the variance in EFA model
               IH1           IH2           IH3           IH4           IH5
               ________      ________      ________      ________      ________
       1         0.812         0.461         0.811         0.675         0.508
@@ -250,7 +258,8 @@ MINIMUM ROTATION FUNCTION VALUE       0.00000
 
 
            Est./S.E. OBLIMIN ROTATED LOADINGS
-           !z-statistics - can be used to perform hypothesis tests
+!z-statistics - can be used to perform hypothesis tests
+
                   1
               ________
  IH1            6.179
@@ -330,7 +339,7 @@ SRMR (Standardized Root Mean Square Residual)
 MINIMUM ROTATION FUNCTION VALUE       0.00827
 
 
-
+!linear combo of variables that make up each factor
            OBLIMIN ROTATED LOADINGS
                   1             2
               ________      ________
@@ -341,7 +350,7 @@ MINIMUM ROTATION FUNCTION VALUE       0.00827
  IH5           -0.073         0.781
  IH6            0.034         0.503
 
-
+! Note that now we have a correlation between the two factors
            OBLIMIN FACTOR CORRELATIONS
                   1             2
               ________      ________
