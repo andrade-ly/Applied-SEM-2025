@@ -1,0 +1,267 @@
+---
+title: "Estimation & Troubleshooting Errors"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60), tidy=TRUE)
+options(scipen=999)
+
+```
+
+```{r}
+# install.packages("DiagrammeR") 
+# install.packages("lavaanPlot") 
+# install.packages("lavaan") 
+# install.packages("dplyr") 
+library(lavaan)
+library(dplyr)
+library(lavaanPlot)
+```
+
+```{r}
+habit <- read.table("sem_categorical.dat", header = FALSE)
+head(habit) # Notice that there are no variable names in this dataset
+```
+
+This is a longer dataset than we used in the last lab, so we'll add column names to the variables. Because we're using the same dataset as the one for Mplus, missing values are still "." At last line of code in this chunk tells R to turn all variables into numeric, which means that the "." (which are character) will be turned into NAs - and that's what we want.
+
+There are other ways to do this, for example: habit[habit == "."] <- NA. This version will convert only "." into NA. If your dataset has qualitative entries that you do not want to remove, this option is safer. 
+
+```{r}
+
+colnames(habit) <- c(
+  'age', #participant age (continuous)
+  'sex', #participant sex (m, f)
+  'white', #participant race/ethnicity (white/not white)
+  'child', #children living at home (yes/no)
+  'init', #self-control by initiation
+  'inhib', #self-control by inhibition
+  'cont', #self-control by continuation
+  'bfi',#conscientiousness from the BFI
+  'psyeffect', #psychological effect of outbreak
+  'sched',#schedule changes due to outbreak
+  'insec',#housing, financial insecurity due to outbreak
+  'prehabit', #pre-outbreak habit
+  'sl', #sleep health (decreased, no change, increased)
+  'exer', #exercise (decreased, no change, increased)
+  'dt', #healthy eating behavior (decreased, no change, increased)
+  'screen', #screen time (decreased, no change, increased)
+  'sm', #social media time (decreased, no change, increased)
+  'subs', #substance use (decreased, no change, increased)
+  'fri', #quality time with friends (decreased, no change, increased)
+  'work', #work productivity (decreased, no change, increased)
+  'hobby', #engagement in hobbies (decreased, no change, increased)
+  'fam'#quality time with family (decreased, no change, increased)
+)
+
+habit <- data.frame(lapply(habit, function(x) as.numeric(as.character(x))))
+head(habit)
+
+```
+
+# Model specification
+
+Today, we're using the variables that make up self-regulation (init, inhib, cont, bfi) and disruption (psyeffect, insec, sched).
+
+We'll first specify the model
+
+```{r}
+
+habit.sem <- 'disrupt =~ psyeffect + sched + insec
+          sreg =~ init + inhib + cont + bfi
+          sreg ~~ disrupt
+          '
+```
+
+## Stop here: Don't estimate the model yet. Can you figure out how many parameters will be estimated?
+1. How many latent means/intercepts (one for each latent variable)?
+2. How many factor loadings? (remember that some may be fixed)
+3. How many variances (only on exogenous variables)?
+4. How many residual variances (only on exogenous variables)?
+5. How many correlations?
+
+# Model estimation
+
+Then we estimate the model as we did before
+
+```{r}
+
+habit.fit <- lavaan::sem(
+  model = habit.sem,
+  data = habit,
+  missing = "ml",
+  estimator = "mlr"
+)
+```
+
+# Create path diagram 
+
+Excellent resources available in R. 
+
+Option 1 (of many): lavaanPlot (https://rdrr.io/cran/lavaanPlot/)
+
+```{r}
+
+lavaanPlot(model = habit.fit, 
+           #graph_options = list(layout = "circo"),
+           node_options = list(shape = "box", fontname = "Helvetica"), # font and sahpe of 
+           edge_options = list(color = "black"), # color of arrows
+           coefs = TRUE, # show coefficients
+           covs = TRUE, # show covariances
+           sig = .05, # min sig to show coeff
+           stars = c("latent", "covs"), # to which coeff to add stars
+           digits = 2,# number of decimal points on coeff
+           graph_options = list(rankdir = "LR") # graph orientation: TB(top-bottom; default), BT (bottom-top), RL (right-left) and LR (left-right)
+           ,
+           stand = TRUE
+           ) 
+
+
+```
+
+
+Option 2: lavaanPlot2 (https://rdrr.io/cran/lavaanPlot/f/vignettes/Conditional_Formatting.Rmd)
+
+```{r}
+
+labels2 = c(disrupt = "disruption", 
+            sreg = "self-regulation", 
+            init = "initiation", 
+            inhib = "inhibition", 
+            cont = "continuation", 
+            bfi = "conscient",
+            psyeffect = "psych effect",
+            sched = "sched changes",
+            insec = "insecurity"
+            )
+
+lavaanPlot2(model = habit.fit, 
+            labels = labels2,
+            edge_options = list(color = "black", penwidth = 0.6),
+            node_options = list(shape = "polygon",color = "black"),
+            coef_labels = TRUE,
+            include = "covs",
+            stars = c("latent", "covs"),
+            graph_options = list(rankdir = "BT"))
+```
+
+Option 3: tidySEM (https://cjvanlissa.github.io/tidySEM/articles/Plotting_graphs.html)
+
+```{r}
+install.packages("tidySEM")
+library(tidySEM)
+graph_sem(model = habit.fit)
+```
+
+# Request output
+
+```{r}
+lavaan::summary(habit.fit, # sem model name
+                fit.measures = TRUE, #request fit stats
+                standardized = TRUE) #request std output
+```
+
+Intercepts with a . before the variable name are observed intercepts, as none of these are latent variables
+Variances with a . are residual variances of the observed variables in this case
+Variance without a . are the latent variable variances
+
+# Use lavInspect to check model parameters and matrices
+
+## Sample statistics (of observed variables)
+
+```{r}
+lavInspect(habit.fit, what = "sampstat")
+```
+
+## Model implied correlation matrices
+
+Of latent variables: 
+
+Model implied vcov matrix of latent variables:
+
+```{r}
+lavInspect(habit.fit, what = "cor.lv")
+```
+
+Use cov.lv to get the covariance matrix. 
+
+Of observed variables:
+
+```{r}
+lavInspect(habit.fit, what = "cor.ov")
+```
+
+Use cov.ov to get the covariance matrix. 
+
+For all variables in model:
+
+```{r}
+lavInspect(habit.fit, what = "cor.all")
+```
+
+Look at the correlations between the latent variables and their indicators. They are identical to the standardized loadings. That's because these loadings are the correlation between the observed variable and their latent factor. This value, when squared, is the amount of variance of the indicator that is explained by the latent construct. Check below.
+
+```{r}
+lavInspect(habit.fit, what = "rsquare")
+```
+
+## Starting values
+
+```{r}
+lavInspect(habit.fit, what = "starting.values")
+```
+
+## Estimated parameters in matrix format
+
+```{r}
+lavInspect(habit.fit, what = "est")
+```
+## Standardized estimated parameters in matrix format
+
+```{r}
+lavInspect(habit.fit, what = "std")
+```
+
+Same as above, but the variances of the latent variables are set to 1.0
+
+```{r}
+lavInspect(habit.fit, what = "std.lv")
+```
+
+## Inspect missing data patterns
+
+```{r}
+lavInspect(habit.fit, what = "patterns")
+```
+
+Note that we have two patterns: One where there's no missing data, and one where there's missing data in the insecurity variable
+
+Also check coverage: Proportion of observed data points for a pair of observed variables. 
+
+```{r}
+lavInspect(habit.fit, what = "coverage")
+```
+
+# Practice
+
+1. Using the lavaan cheat sheet or the slides from class, how would you specify model habit.sem so that the first loadings of the latent variables are freely estimated? Estimate the model and check how it compares with the diagram above when "stand = TRUE."
+
+```{r}
+
+```
+
+2. How would you change the model above to add covariances between the indicators of self-regulation? Estimate the model and check the output. How does fit change? 
+
+```{r}
+
+```
+
+3. How many parameters are being estimated in each model? Why has the number changed (what has remained constant and what has changed)?
+
+```{r}
+
+```
+
+
