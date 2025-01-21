@@ -1,0 +1,89 @@
+---
+title: "W6 practice"
+output:
+  pdf_document: default
+  html_document: default
+date: '2023-02-16'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+##########################################
+############# week 3 exercise ############
+##########################################
+
+```
+
+
+# 0. data step 
+```{r}
+
+library(haven); library(psych); library(dplyr); library(tidyr);
+library(magrittr); library(ggplot2); library(gridExtra)
+library(rstatix)
+
+  drugtest = 
+    data.frame(drug = factor(rep(c("A", "D", "F"), each = 2, times = 5), 
+                             levels = c("F", "A", "D")), # F as reference
+               pretreatment = c(11, 6, 6, 8, 16, 16, 8, 10, 6, 19, 13, 12, 
+                                5, 6, 7, 8, 11, 12, 14 ,11 ,8, 5, 9, 7,
+                                19, 3, 18, 15, 16, 12),
+               posttreatment = c(6, 4, 2, 4, 13, 12, 0, 13, 2, 14, 10, 8,
+                                 2, 1, 5, 9, 16, 12, 8, 8, 4, 4, 5, 6,
+                                 11, 0, 12, 9, 15, 14))
+  
+  # histogram
+  drugtest$pretreatment %>% hist
+  drugtest$posttreatment %>% hist
+
+  # means & vaiances 
+  drugtest %>% describeBy("drug") # easy way 
+
+  drugtest %>% # another way 
+    gather(key = treatment, value = value, -drug) %>% 
+    mutate(treatment = factor(treatment)) %>% 
+    group_by(drug, treatment) %>% 
+    summarise(n = n(), 
+              mean = mean(value),
+              median = median(value),
+              sd = sd(value),
+              se = sd/sqrt(n))
+  
+  
+  # box plot
+  drugtest %>% 
+    ggplot(aes(x = drug, y = posttreatment, group = drug, color = drug)) + 
+    geom_boxplot() + 
+    theme_classic()
+    
+```  
+
+# 1. Run ANVOCA 
+
+```{r}
+  # unadjusted 
+  fit1 = lm(posttreatment ~ drug, data = drugtest)
+  summary(fit1)
+  confint(fit1)
+  anova(fit1)
+
+  # adjusted
+  fit2 = lm(posttreatment ~ drug + pretreatment, data = drugtest)
+  summary(fit2)
+  confint(fit2)
+  anova(fit2)
+  
+  # get adjusted menas
+  tmp.adj= 
+    drugtest %>% 
+    group_by(pretreatment) %>% 
+    emmeans_test(posttreatment ~ drug, detailed = T) # multipled comparison
+  get_emmeans(tmp.adj) # getting adjusted means 
+  
+  
+```
+

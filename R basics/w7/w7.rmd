@@ -1,0 +1,265 @@
+---
+title: "W7 practice"
+output:
+  pdf_document: default
+  html_document: default
+date: '2023-02-23'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 4, fig.height = 3, fig.align = "center", warning = FALSE)
+
+
+##########################################
+############# week 7 exercise ############
+##########################################
+
+```
+
+
+# 1. rats data   
+```{r}
+
+  library(haven); library(psych); library(dplyr); 
+  library(magrittr); library(ggplot2); library(gridExtra)
+  library(rstatix); library(multcomp)
+  
+  
+  rats = 
+    data.frame(rat_id = c(1:72),
+               drug = c(rep(c("B", "A", "C"), times = 24)),
+               timelift = c(c(5.2, 5.1, 2.4, 4.3, 3.1, 2.4, 
+                              4.2, 5.0, 2.4, 2.4, 4.6, 1.2, 
+                              5.1, 5.2, 2.9, 3.3, 4.5, 3.2, 
+                              4.6, 5.0, 2.8, 2.9, 4.1, 2.2, 
+                              3.8, 4.1, 2.4, 3.9, 3.8, 2.2, 
+                              4.7, 4.5, 2.6, 3.9, 3.1, 3.4, 
+                              3.4, 4.5, 3.6, 3.9, 4.2, 2.0, 
+                              4.3, 3.5, 2.6, 2.8, 2.9, 3.1, 
+                              5.0, 4.0, 1.8, 3.5, 3.8, 2.9, 
+                              2.1, 3.1, 2.9, 4.2, 3.7, 3.4, 
+                              3.7, 3.9, 3.7, 3.6, 3.9, 2.6, 
+                              3.2, 3.2, 2.8, 2.9, 5.1, 3.1)))
+  
+```  
+
+# 1-1. rats ANOVA
+
+```{r}
+  
+# making drug C as reference group
+  rats = 
+    rats %>% mutate(drug = factor(rats$drug, levels = c("C", "A", "B"))) 
+
+# boxplot
+  rats %>% 
+    ggplot(aes(drug, timelift, color = drug, group = drug)) + 
+    geom_boxplot() + 
+    stat_summary(fun = mean, geom="point") +
+    theme_bw() +
+    ggtitle("Distribution of timelift")
+
+# ANOVA  
+  fit1 = lm(timelift ~ drug, data = rats)
+  summary(fit1)
+  anova(fit1)
+  
+  library(ggeffects)
+  ggpred = ggpredict(fit1, "drug") # get mean and CIs
+  plot(ggpred)
+  
+```
+
+\newpage
+
+# 2. rats2
+
+```{r}
+
+  rats2 = 
+    data.frame(rat_id = c(1:72),
+               sex = c( "F", "F", "F", "M", "F", "F", "F", "F", "M", "F", "M", "F", "F", "F", "M", "F", "M", "M", "M", "M", "M", "M", "F", "F", "M", "M", "M", "F", "F", "M", "F", "M", "F", "M", "F", "F", "M", "F", "M", "M", "F", "M", "F", "M", "M", "M", "F", "M", "F", "M", "M", "M", "M", "M", "M", "F", "M", "M", "F", "F", "F", "F", "F", "F", "F", "F", "F", "M", "F", "M", "F", "M"), 
+               drug = c(rep(c("B", "A", "C"), times = 24)),
+               timelift = c(c(5.2, 5.1, 2.4, 4.3, 3.1, 2.4, 
+                              4.2, 5.0, 2.4, 2.4, 4.6, 1.2, 
+                              5.1, 5.2, 2.9, 3.3, 4.5, 3.2, 
+                              4.6, 5.0, 2.8, 2.9, 4.1, 2.2, 
+                              3.8, 4.1, 2.4, 3.9, 3.8, 2.2, 
+                              4.7, 4.5, 2.6, 3.9, 3.1, 3.4, 
+                              3.4, 4.5, 3.6, 3.9, 4.2, 2.0, 
+                              4.3, 3.5, 2.6, 2.8, 2.9, 3.1, 
+                              5.0, 4.0, 1.8, 3.5, 3.8, 2.9, 
+                              2.1, 3.1, 2.9, 4.2, 3.7, 3.4, 
+                              3.7, 3.9, 3.7, 3.6, 3.9, 2.6, 
+                              3.2, 3.2, 2.8, 2.9, 5.1, 3.1))) 
+  
+   rats2 = 
+      rats2 %>% mutate(drug = factor(rats2$drug, levels = c("C", "A", "B"))) 
+  
+
+```
+
+
+# 2-1. two-way ANOVA 
+
+```{r}
+
+  fit2 = lm(timelift ~ drug*sex, data =rats2)
+  summary(fit2)
+  anova(fit2)
+  
+  ggpred2 = ggpredict(fit2, c("drug", "sex")) # get mean and CIs
+  plot(ggpred2, colors = c("#fa9fb5","#2b8cbe"))
+  plot(ggpred2, connect.lines = TRUE, colors = c("#fa9fb5","#2b8cbe"))
+
+```
+
+\newpage
+
+# 3. factorial ANOVA
+```{r}
+
+# data step
+  faex = 
+    data.frame(hec = factor(rep(c(3,5), times = 10)),
+               paa = factor(c(rep(c(1,3), each = 10))),
+               zsv = c(1.9,	8.7,
+                       2.3,	9.0,
+                       2.0,	8.8,
+                       2.1,	9.1,
+                       2.0,	9.0,
+                       4.3,	18.5,
+                       4.7,	18.5,
+                       4.8,	18.2,
+                       4.7,	13.3,
+                       4.8,	18.2))
+
+# descriptive stats   
+  faex %>% 
+    group_by(hec, paa) %>% 
+    summarise(N = n(),
+              mean = mean(zsv),
+              median = median(zsv),
+              var = var(zsv),
+              sd = sd(zsv))
+
+```
+
+# 3-1. Run factorial ANOVA  
+```{r}
+
+  fit3 = lm(zsv ~ hec*paa, data = faex)
+  summary(fit3)
+  anova(fit3)
+  
+  ggpred3 = ggpredict(fit3, c("hec", "paa")) # get mean and CIs
+  plot(ggpred3, colors = c("#fa9fb5","#2b8cbe"))
+  plot(ggpred3, connect.lines = TRUE, colors = c("#fa9fb5","#2b8cbe"))
+
+  library(lsmeans) 
+  lsmeans(fit3, c("hec", "paa")) # get LS menas
+
+  TukeyHSD(aov(zsv ~ hec*paa, data = faex), ordered = TRUE) # multiple comparison with Tukey method
+  
+``` 
+
+\newpage
+
+# 4. Vision data
+
+```{r}
+
+  library(readr)
+  vision = read_csv("vision.csv") 
+  # I copy paste the data in the word file to excel..
+  
+  vision %>% names
+  
+  vision$race = factor(vision$race, levels = c("Aboriginal","European"))
+  vision$gender = factor(vision$gender, levels = c("Male", "Female"))
+  vision$group = factor(vision$group, levels = c("1", "2", "3", "4"))
+  vision$agegrp = factor(vision$agegrp, levels = c("20-29y"
+, "30-39y"))
+
+  
+```
+
+# 4-1. ANOVA 
+```{r}
+  fit4 = lm(acuity ~ race*gender, data = vision)
+  summary(fit4)
+  anova(fit4)
+  
+  # assumption check
+  plot(fit4)
+  jack = rstudent(fit4)
+  plot(jack, ylab="Jacknife Residuals",main="Jacknife Residuals")
+  
+  ggpred4 = ggpredict(fit4, c("race", "gender")) # get mean and CIs
+  plot(ggpred4, colors = c("#fa9fb5","#2b8cbe"))
+  plot(ggpred4, connect.lines = TRUE, colors = c("#fa9fb5","#2b8cbe"))
+
+  
+```
+
+\newpage
+
+# 5. Campus data
+```{r}
+  campus = read_csv("campus.csv") 
+  campus %>% names
+  
+  campus$cafeteria = campus$cafeteria %>% factor()
+  campus$brand = campus$brand %>% factor()
+
+```
+
+# 5-1. ANOVA
+
+```{r}
+
+  fit5 = lm(bacteria ~ brand*cafeteria, data = campus)
+  summary(fit5)
+  anova(fit5)
+  
+  ggpred5 = ggpredict(fit5, c("brand", "cafeteria")) # get mean and CIs
+  plot(ggpred5, connect.lines = TRUE, jitter = 0.3) + 
+    scale_fill_brewer(palette="Spectral") + 
+    theme_classic()
+  
+  library(lsmeans) 
+  lsmeans(fit5, c("brand", "cafeteria")) # get LS menas
+  
+
+```
+
+\newpage
+
+# 6. irradiate
+
+```{r}
+
+  irradiate = read_csv("irradiate.csv") 
+  irradiate %>% names
+  
+  irradiate$batch = factor(irradiate$batch)
+  irradiate$duration = factor(irradiate$duration)
+
+```
+
+# 6-1. linear mixed effect model
+
+```{r}
+  library(lme4); library(lmerTest)
+  
+  fit6  = lmer(bacteria ~ duration + (1 + duration | batch), data = irradiate) # mixed-effect model with duration as the fixed effect and batch as the random effect.
+  
+  # Calculate LS means with Tukey's adjustment
+  lsmeans(fit6, "duration", adjust = "tukey")
+  
+
+
+
+```

@@ -1,0 +1,153 @@
+---
+title: "exrcise 4"
+output:
+  html_document: default
+  pdf_document: default
+date: '2023-04-19'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 4, fig.height = 3, fig.align = "center", warning = FALSE, message = FALSE)
+
+
+##########################################
+################ exercise 4 ##############
+##########################################
+
+```
+
+
+# Datastep
+
+```{r}
+
+  library(psych); library(dplyr); library(magrittr); 
+  library(readxl); library(haven)
+
+# Read data
+
+  opirx = read_excel("opirx.xls")
+  
+# Loading data
+
+  one =
+    opirx %>%
+    mutate(age5 = age / 5,
+     opiate = ifelse(opiate == 1, "heroin", "other opioid"),
+     newrx = ifelse(newrx == 1, "yes", "no"),
+     female = ifelse(female == 1, "yes", "no"),
+     homeless = ifelse(homeless == "1_yes", "yes", ifelse(homeless == "0_no", "no", homeless)),
+     satreat = as.factor(satreat))
+  
+# Applying labels
+    
+  library(labelled)
+  
+  var_label(one) = 
+    list(age = "age at baseline",
+         age5 = "age divided by 5",
+         opiate = "opiate type",
+         newrx = "new medication",
+         female = "female",
+         homeless = "homeless",
+         satreat = "any prior substance abuse treatment",
+         racebl = "Black vs. White",
+         socsupp = "Social support scale",
+         substuse = "use of any substance post detox")
+
+# Viewing contents
+  str(one)
+  summary(one)
+  describe(one)
+
+# Freq table
+  table(one$female)
+  table(one$homeless)
+  table(one$racebl)
+  table(one$satreat)
+
+  library(tableone)
+  CreateTableOne(data = one)
+  
+```
+
+# Q1. logistic models
+
+```{r}
+  
+  fit.female = glm(substuse ~ female, data = one, family = binomial(link = "logit")) 
+  summary(fit.female)
+  exp(coef(fit.female)[2]) #odd ratio
+  exp(confint(fit.female)) #95% CI
+  
+  fit.homeless = glm(substuse ~ homeless, data = one, family = binomial(link = "logit")) 
+  summary(fit.homeless)
+  exp(coef(fit.homeless)[2])
+  exp(confint(fit.homeless))  
+  
+  fit.satreat = glm(substuse ~ satreat, data = one, family = binomial(link = "logit")) 
+  summary(fit.satreat)
+  exp(coef(fit.satreat)[2])
+  exp(confint(fit.satreat))
+  
+# Following function works too
+  library(DescTools)
+  OddsRatio(fit.female)
+  
+  
+```
+
+# Q2
+
+```{r}
+
+  fit.age = glm(substuse ~ age, data = one, family = binomial(link = "logit")) 
+  summary(fit.age)
+  exp(coef(fit.age)[2]) #odd ratio
+  exp(confint(fit.age)) #95% CI
+  
+```
+
+# Q3
+
+```{r}
+
+  fit.age5 = glm(substuse ~ age5, data = one, family = binomial(link = "logit")) 
+  summary(fit.age5)
+  exp(coef(fit.age5)[2]) #odd ratio
+  exp(confint(fit.age5)) #95% CI
+  
+```
+
+# Q4
+
+```{r}
+
+# create binary social support var
+  one = 
+  one %>% 
+  mutate(socsupp.bi = ifelse(socsupp > mean(one$socsupp), 1, 0))
+  
+
+  fit.socbi = glm(substuse ~ socsupp.bi, data = one, family = binomial(link = "logit")) 
+  summary(fit.socbi)
+  exp(coef(fit.socbi)[2]) #odd ratio
+  exp(confint(fit.socbi)) #95% CI
+  
+```
+
+# Q5
+
+```{r}
+
+  fit.all = glm(substuse ~ age5 + female + homeless + satreat + racebl + socsupp.bi, 
+                data = one, family = binomial(link = "logit")) 
+  summary(fit.all)
+  
+  library(DescTools)
+  OddsRatio(fit.all)
+
+```
+
