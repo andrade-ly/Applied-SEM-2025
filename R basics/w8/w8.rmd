@@ -1,0 +1,131 @@
+---
+title: "W8 practice"
+output:
+  pdf_document: default
+  html_document: default
+date: '2023-03-01'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 4, fig.height = 3, fig.align = "center", warning = FALSE)
+
+
+##########################################
+############# week 8 exercise ############
+##########################################
+
+```
+
+
+# 1. example 1
+
+```{r}
+
+  library(haven); library(psych); library(dplyr); 
+  library(magrittr); library(ggplot2); library(gridExtra)
+  library(rstatix); library(multcomp)
+  
+  one =
+    data.frame(
+    AGE = c(6,7,8,9,10,11,12,13,14,15,16),
+    DRYWGT = c(0.029, 0.052, 0.079, 0.125, 0.181, 0.261, 0.425, 0.738, 1.13, 1.882, 2.812),
+    LOGDRYWG = c(-1.538, -1.284, -1.102, -0.903, -0.742, -0.583, -0.372, -0.132, 0.053, 0.275, 0.449)
+    )
+
+  # print summary statistics
+  summary(one)
+    
+  # plot scatter plot of dry weight against age
+  ggplot(one, aes(x=DRYWGT, y=AGE)) + geom_point()
+  
+  # plot scatter plot of log dry weight against age
+  ggplot(one, aes(x=LOGDRYWG, y=AGE)) + geom_point()
+
+```
+
+\newpage
+
+# 1-1. Fit a regression model
+
+```{r}
+
+  # fit linear regression model and print summary
+  lm_drywgt = lm(AGE ~ DRYWGT, data=one)
+  summary(lm_drywgt)
+  
+  # fit linear regression model, output residuals and predicted values, and print summary
+  lm_drywgt_out = lm(AGE ~ DRYWGT, data=one)
+  check = data.frame(
+    RSTUDENT = rstudent(lm_drywgt_out),
+    PREDICTED = predict(lm_drywgt_out),
+    H = hatvalues(lm_drywgt_out),
+    COOKD = cooks.distance(lm_drywgt_out)
+  )
+  summary(check)
+  
+  # print data where age is 6 or 16
+  subset(one, AGE %in% c(6,16))
+  
+  # fit linear regression model with log dry weight and print summary
+  lm_logdrywgt = lm(AGE ~ LOGDRYWG, data=one)
+  summary(lm_logdrywgt)
+  
+  # fit linear regression model with log dry weight, output residuals and predicted values, and print summary
+  check_logdrywgt = data.frame(
+    RSTUDENT = rstudent(lm_logdrywgt),
+    PREDICTED = predict(lm_logdrywgt),
+    H = hatvalues(lm_logdrywgt),
+    COOKD = cooks.distance(lm_logdrywgt)
+  )
+  summary(check_logdrywgt)
+
+```
+
+\newpage
+
+# 2. example 3
+
+```{r}
+
+  three =
+    data.frame(
+    Id = c(1:19),
+    age = c(24, 36, 28, 25, 26, 22, 27, 27, 36, 24, 26, 29, 33, 31, 30, 22, 27, 46, 36),
+    sex = c("M", "M", "F", "M", "F", "M", "M", "M", "M", "M", "M", "M", "F", "M", "M", "M", "M", "M", "M"),
+    height = c(175, 172, 171, 166, 166, 176, 185, 171, 185, 182, 180, 163, 180, 180, 180, 168, 168, 178, 173),
+    weight = c(78, 67.6, 98, 65.5, 65, 65.5, 85.5, 76.3, 79, 88.2, 70.5, 75, 68, 65, 70.4, 63, 91.2, 67, 62),
+    fev1 = c(4.7, 4.3, 3.5, 4, 3.2, 4.7, 4.3, 4.7, 5.2, 4.2, 3.5, 3.2, 2.6, 2, 4, 3.9, 3, 4.5, 2.4)
+    )
+
+```
+
+# 2-1. regression model
+
+```{r}
+
+  # fit linear regression model and print summary
+  lm_fev1 = lm(fev1 ~ age + height + weight, data=three)
+  summary(lm_fev1)
+  
+  # add log transformation to weight variable
+  three$log_weight = log(three$weight)
+  
+  # fit linear regression model with log transformation and print summary
+  lm_fev1_log_weight = lm(fev1 ~ age + height + log_weight, data=three)
+  summary(lm_fev1_log_weight)
+  
+  # centering variables
+  three= 
+    three %>% mutate(age_c = age - mean(age),
+                     weight_c = weight - mean(weight),
+                     height_c = height - mean(height))
+  
+  # squared terms for age, weight, and height
+  three= 
+    three %>% mutate(age_sq = age^2,
+                     weight_sq = weight^2,
+                     height_sq = height^2)
+
+```

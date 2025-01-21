@@ -1,0 +1,320 @@
+---
+title: "W10 practice"
+output:
+  pdf_document: default
+  html_document: default
+date: '2023-03-01'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 4, fig.height = 3, fig.align = "center", warning = FALSE, message = FALSE)
+
+
+##########################################
+############# week 10 exercise ###########
+##########################################
+
+```
+
+
+# 1. height data
+
+```{r}
+
+  library(haven); library(psych); library(dplyr); 
+  library(magrittr); library(ggplot2); library(gridExtra)
+  library(rstatix); library(multcomp); library(ggeffects)
+
+# Read the data
+  height = data.frame(
+    child = c(1,1,1,2,2,2,3,3,3,4,4,4,5,5,5),
+    age = c(6,7,8,6,7,8,6,7,8,6,7,8,6,7,8),
+    height = c(46.3,49.5,51.7,46.0,47.8,50.5,42.5,44.0,45.6,47.0,50.2,52.2,45.5,47.2,49.1)
+  )
+
+# First run an OLS model predicting height by age
+  ols_model = 
+    lm(height ~ age, data = height)
+  summary(ols_model)
+
+# Then run a model accounting for the repeated measurements
+  library(lme4)
+  library(lmerTest)
+  mixed_model = 
+    lmer(height ~ age + (1|child), data = height)
+
+  summary(mixed_model)
+
+# Then transpose the data from long to wide
+  library(tidyr)
+  height_wide = 
+    spread(height, key = age, value = height)
+  colnames(height_wide) = 
+    c("child", "height6", "height7", "height8")
+
+# Check it
+  print(height_wide)
+
+# Calculate means for the 3 height measurements
+  colMeans(height_wide[,2:4])
+
+# Looking at the means at each time point to see if they are different
+# Essentially our independent variable is time
+
+# Repeated measures ANOVA
+  height_anova = 
+    aov(height ~ age + Error(child), data = height)
+  summary(height_anova)
+
+
+
+```
+
+# 2. exone data
+
+```{r}
+# Create the exone dataset
+  exone = data.frame(
+    subjid = 1:10,
+    asa = c(5, 5, 5, 6, 6, 4, 4, 4, 4, 5),
+    apap = c(3, 4, 6, 4, 6, 2, 4, 5, 2, 3),
+    ibp = c(2, 3, 5, 2, 6, 1, 3, 5, 2, 1)
+  )
+
+# Print the exone dataset
+  print(exone)
+
+# Frequency of subjid
+  table(exone$subjid)
+
+# Means of asa, apap, and ibp
+  colMeans(exone[, c("asa", "apap", "ibp")])
+
+# Convert the exone dataset to long format
+  library(tidyr)
+  exone_long = 
+    exone %>%
+    pivot_longer(cols = c(asa, apap, ibp), names_to = "drug", values_to = "value")
+
+# Perform the one-way ANOVA with repeated measures
+  exone_anova = 
+    aov(value ~ drug + Error(subjid), data = exone_long)
+  summary(exone_anova)
+  
+  library(emmeans)
+  lsmeans = 
+    emmeans(exone_anova, ~ factor(drug))
+  
+# Compare the means for the different levels of the drug factor
+  pairs(lsmeans) 
+
+  
+# Create exoneb dataset
+  exoneb = data.frame(
+    subjid = rep(1:10, each = 2),
+    drug = rep(c(0, 1), 10),
+    pscore = c(5, 3, 5, 4, 5, 6, 6, 4, 6, 6, 4, 2, 4, 4, 4, 5, 4, 2, 5, 1)
+  )
+
+# Fit mixed-effects models with lme4 package
+  library(lme4)
+  model1 = 
+    lmer(pscore ~ drug + (1|subjid), data = exoneb)
+  summary(model1)
+
+```
+
+# 3. ex2 data
+
+```{r}
+
+# Create ex2 dataset
+  ex2 = data.frame(
+    subjid = c(1:10, 1:10),
+    brand = c(rep(1, 10), rep(0, 10)),
+    asa = c(5, 5, 5, 6, 6, 4, 4, 4, 4, 5, 4, 4, 5, 5, 5, 3, 4, 4, 4, 4),
+    apap = c(3, 4, 6, 4, 6, 2, 4, 5, 2, 3, 3, 3, 6, 4, 6, 2, 4, 5, 2, 3),
+    ibp = c(2, 3, 5, 2, 6, 1, 3, 5, 2, 1, 3, 3, 6, 3, 6, 1, 2, 5, 2, 2)
+  )
+
+# Frequency table
+  table(ex2$subjid)
+  table(ex2$asa)
+  table(ex2$apap)
+  table(ex2$ibp)
+
+# Convert data to long format
+  ex2_long = 
+    ex2 %>% 
+    gather(key = "drug", value = "value", -subjid, -brand)
+
+# Perform two-way ANOVA with repeated measures
+  ex2_anova = 
+    aov(value ~ drug * brand + Error(subjid), data = ex2_long)
+
+# Print the results
+  summary(ex2_anova)
+
+# Least square means
+  library(emmeans)
+  lsmeans_result = 
+    emmeans(ex2_anova, ~drug)
+  summary(lsmeans_result)
+
+# Create extwo dataset
+  extwo = data.frame(
+    subjid = rep(1:10, each = 6),
+    drug = rep(rep(0:2, each = 2), 10),
+    brand = rep(rep(0:1, 3), 10),
+    pscore = c(
+      5, 3, 2, 4, 3, 3, 5, 4, 3, 4, 3, 3, 5, 6, 5, 5, 6, 6, 6, 4, 2, 5, 4, 3,
+      6, 6, 6, 5, 6, 6, 4, 2, 1, 3, 2, 1, 4, 4, 3, 4, 4, 2, 4, 5, 5, 4, 5, 5,
+      4, 2, 2, 3, 2, 3, 5, 3, 1, 4, 3, 2
+    )
+  )
+
+# Frequency table
+  table(extwo$drug)
+  table(extwo$brand)
+  table(extwo$subjid)
+
+# Two-way ANOVA with repeated measures
+  extwo_aov = 
+    lmer(
+    pscore ~ drug * brand + (1 | subjid), 
+    data = extwo, 
+    REML = FALSE)
+
+# Summary of the model
+  summary(extwo_aov)
+
+# Fitting the model without interaction
+  extwo_aov_no_interaction = 
+    lmer(
+    pscore ~ drug + brand + (1 | subjid), 
+    data = extwo, 
+    REML = FALSE)
+
+# Summary of the model without interaction
+  summary(extwo_aov_no_interaction)
+
+
+```
+
+# 4. exercise
+
+```{r}
+
+
+# Data input
+  exercise = tribble(
+    ~id, ~exertype, ~diet, ~time1, ~time2, ~time3,
+  1 ,  1,  1,   85,   85,   88,
+  2 ,  1,  1,   90,   92,   93,
+  3 ,  1,  1,   97,   97,   94,
+  4 ,  1,  1,   80,   82,   83,
+  5 ,  1,  1,   91,   92,   91,
+  6 ,  1,  2,   83,   83,   84,
+  7 ,  1,  2,   87,   88,   90,
+  8 ,  1,  2,   92,   94,   95,
+  9 ,  1,  2,   97,   99,   96,
+  10,  1,  2,  100,   97,  100,
+  11,  2,  1,   86,   86,   84,
+  12,  2,  1,   93,  103,  104,
+  13,  2,  1,   90,   92,   93,
+  14,  2,  1,   95,   96,  100,
+  15,  2,  1,   89,   96,   95,
+  16,  2,  2,   84,   86,   89,
+  17,  2,  2,  103,  109,   90,
+  18,  2,  2,   92,   96,  101,
+  19,  2,  2,   97,   98,  100,
+  20,  2,  2,  102,  104,  103,
+  21,  3,  1,   93,   98,  110,
+  22,  3,  1,   98,  104,  112,
+  23,  3,  1,   98,  105,   99,
+  24,  3,  1,   87,  132,  120,
+  25,  3,  1,   94,  110,  116,
+  26,  3,  2,   95,  126,  143,
+  27,  3,  2,  100,  126,  140,
+  28,  3,  2,  103,  124,  140,
+  29,  3,  2,   94,  135,  130,
+  30,  3,  2,   99,  111,  150
+  )
+
+# Convert the data to long format
+  exercise_long = 
+    exercise %>%
+    pivot_longer(cols = starts_with("time"),
+                 names_to = "time",
+                 values_to = "pulse") 
+
+# Fit the ANOVA model with repeated measures
+  exercise_aov1 = 
+    aov(pulse ~ factor(diet) * time + Error(id), data = exercise_long)
+  summary(exercise_aov1)
+  
+cat("Looking at the results from the manova test 
+    the effect of time is significant but the 
+    interaction of time and diet is not significant. 
+    The between subject test of the effect of diet 
+    is also not significant. Consequently, in the graph 
+    we have lines that are not flat, in fact, they are 
+    actually increasing over time, which was expected 
+    since the effect of time was significant. 
+    Furthermore, the lines are approximately parallel 
+    which was anticipated since the interaction was 
+    not significant.")
+  
+# Fit the ANOVA model with repeated measures using exertype as the group variable
+  exercise_aov2 = 
+    aov(pulse ~ factor(exertype) * time + Error(id), data = exercise_long)
+
+# Print the summary
+  summary(exercise_aov2)
+  
+cat("The interaction of time and exertype is significant 
+    as is the effect of time.  The between subject test 
+    of the effect of exertype is also significant. 
+    Consequently, in the graph we have lines that are 
+    not parallel which we expected since the interaction 
+    was significant. Furthermore, we see that some of the 
+    lines that are rather far apart and at least one line 
+    is not horizontal which was anticipated since exertype 
+    and time were both significant.")
+  
+  ls_means = 
+    emmeans(exercise_aov2, ~ exertype | time)
+
+  means_df = 
+    as.data.frame(ls_means)
+
+  ggplot(means_df, aes(x = time, y = emmean, 
+                       group = exertype, color = as.factor(exertype))) +
+    geom_line() +
+    geom_point() +
+    scale_color_manual(values = c("lightblue", "lightpink", "lightgreen")) +
+    labs(x = "Time", y = "Means", color = "Exertype") +
+    theme_minimal()
+  
+  
+# Fit the linear mixed-effects model
+  exercise_mixed1 = 
+    lmer(pulse ~ factor(exertype) * time + (1 | id), data = exercise_long)
+  summary(exercise_mixed1)
+
+# Fit the autoregressive model
+  library(nlme)
+  exercise_mixed2 = 
+    lme(pulse ~ factor(exertype) * time, 
+        random = ~ 1 | id, 
+        correlation = corAR1(form = ~ 1 | id), 
+        data = exercise_long)
+  summary(exercise_mixed2)
+  
+# plot
+  ggpredict(exercise_mixed1, c("time", "exertype")) %>% 
+    plot(connect.line = T, color = c("lightblue", "lightpink", "lightgreen"))
+  
+```

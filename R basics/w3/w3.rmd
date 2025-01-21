@@ -1,0 +1,122 @@
+---
+title: "W3 practice"
+output:
+  pdf_document: default
+  html_document: default
+date: '2023-01-26'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+##########################################
+############# week 3 exercise ############
+##########################################
+library(haven); library(psych); library(dplyr); 
+library(magrittr); library(ggplot2); library(gridExtra)
+library(epitools); library(lsr); library(descr); library(epiR); library(epiDisplay)
+
+```
+
+
+# 0. data step 
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+library(haven); library(psych); library(dplyr); 
+library(magrittr); library(ggplot2); library(gridExtra)
+library(epitools); library(lsr); library(descr); library(epiR); library(epiDisplay)
+
+  dat <- read_dta("w3/Choices.dta")
+  names(dat) # name of the variables
+  dat %>% dim # 2536, 16
+  summary(dat) # get min, max, NA's
+  describe(dat)
+```  
+
+# 1. Create a new variable (pref2cat) 
+
+```{r}
+  dat$pref %>% hist
+  dat$gender
+  dat$pref %>% median()
+  
+  
+  dat$gender %>% table()
+
+  dat = 
+    dat %>% 
+    mutate(pref2cat = ifelse(pref > 1, 1, 0),
+           gender.ch = ifelse(gender == 1, "F", "M"),
+           race.ch = ifelse(race == 1, "W", "B"))
+```
+
+# 2. Define the percentage of Black men and Black women
+
+```{r}
+
+  tab = table(dat$race, dat$gender)
+  tab[1,2]/sum(tab)*100 # percentage of black man
+  tab[1,1]/sum(tab)*100 # percentage of blakc women
+```
+
+
+# 3. Calculate the difference in proportion between men and women for prefcat=1 vs prefcat=0
+
+```{r}
+
+  ## with a 95% confidence interval (Risk/prevalence difference)
+  cont = xtabs( ~ gender + pref2cat, dat = dat) # create a contingency table
+  riskratio(cont) # difference in proportion: 434/1556*100 - 292/980*100
+  riskratio(dat$gender, dat$pref2cat) # this works too
+
+  prop.test(x = c(434, 292), n = c(1556, 980))
+
+```
+
+# 4. Conduct a chi square test for with gender and prefcat
+```{r}
+
+  chisq.test(cont)
+```
+
+# 5. Maental-Haenzel stratified analysis
+```{r}
+
+
+  mhor(dat$gender, dat$pref2cat, dat$race)
+```
+
+# 6. Conduct an independent samples t-test comparing the mean preference score between men and women
+```{r}
+
+  t.test(pref ~ gender, data = dat) # outcome ~ predictor
+```
+
+# 7. Conduct a paired t-test comparing pref and fpref in the dataset
+
+```{r}
+
+  # t.test(before, after, paired = TRUE)
+  t.test(dat$fpref, dat$pref, paired = TRUE)
+```
+
+# 8. anova
+
+```{r}
+dat$educ %>% class
+dat$educ = dat$educ %>% as.factor()
+
+# dat =
+#   dat %>%
+#   mutate(educ = as.factor(educ))
+
+  fit = lm(pref ~ educ, data = dat)
+  anova(fit)
+  pairwise.t.test(dat$pref, dat$educ, p.adjust.method="bonferroni")
+
+
+```
+
