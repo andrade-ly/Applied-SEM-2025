@@ -3,9 +3,7 @@ Welcome to Applied SEM (PSY 768)!
 You can find the R and Mplus codes for the course PSY 768: Applied Structural Equation Modeling here. Data files will be available on the Canvas course page.
 
 Authors:
-R scripts created and annotated by Fernanda C. Andrade, Ph.D., and edited by Jinyoung Park, M.S.
-
-Mplus scripts created and annotated by Erin K. Davisson, Ph.D., and edited by Fernanda C. Andrade, Ph.D.
+Fernanda C. Andrade, Ph.D., Erin K. Davisson, Ph.D., Jinyoung Park, M.S.
 
 References:
 Muthén, L.K., and B.O. Muthén. 2017. Mplus user’s guide, 8th ed. Los Angeles, CA: Muthén & Muthén
