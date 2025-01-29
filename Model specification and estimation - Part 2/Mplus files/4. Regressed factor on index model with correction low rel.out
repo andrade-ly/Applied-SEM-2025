@@ -1,22 +1,22 @@
 Mplus VERSION 8.11 (Mac)
 MUTHEN & MUTHEN
-01/29/2025  12:11 PM
+01/29/2025   1:37 PM
 
 INPUT INSTRUCTIONS
 
   ! ***************************************************
   !To demonstrate what happens when reliability is high/low and not accounted for in the
   !model (i.e., it will bias path coefficients and disturbances), let's pretend that
-  !reliability of disrupt_index is 0.85. We know the variance of disr_index from
+  !reliability of disrupt_index is 0.40. We know the variance of disr_index from
   !model's we've estimated, or by checking your output.
-  !s2 = 0.723. So the error variance is (1-0.85)*0.723 = 0.108
+  !s2 = 0.723. So the error variance is (1-0.40)*0.723 = 0.4338
   !
   !In syntax below, the specification for sreg is the same , but we now
   !created a latent variable called "disrupt" that is defined by a single indicator,
   !which is our disrupt_index index. For identification, we need the
   !loading to be 1, which also means that the item is a perfect reflection of our latent var
   !
-  !Then, we specified the error variance of that factor to be 0.108
+  !Then, we specified the error variance of that latent variable to be 0.4338
   !and regressed sreg on the new latent variable called disrupt
   ! ***************************************************
 
@@ -61,8 +61,8 @@ INPUT INSTRUCTIONS
   !now sreg is regressed on disrupt (disrupt -> sreg)
   sreg ON disrupt;
 
-  !Fix the value of the variance of disr_index
-  disrupt@0.108;
+  !Fix the value of the adjusted variance of disrupt
+  disr_index@0.4338;
 
 
   OUTPUT:
@@ -266,7 +266,7 @@ MODEL RESULTS
     DISR_INDEX         1.000      0.000    999.000    999.000
 
  SREG     ON
-    DISRUPT           -0.913      0.306     -2.984      0.003
+    DISRUPT           -0.341      0.117     -2.906      0.004
 
  Intercepts
     INIT               3.270      0.047     70.144      0.000
@@ -275,19 +275,19 @@ MODEL RESULTS
     DISR_INDEX         3.182      0.041     77.671      0.000
 
  Variances
-    DISRUPT            0.108      0.000    999.000    999.000
+    DISRUPT            0.289      0.041      7.008      0.000
 
  Residual Variances
     INIT               0.485      0.064      7.560      0.000
     INHIB              0.341      0.027     12.435      0.000
     CONT               0.249      0.042      5.974      0.000
-    DISR_INDEX         0.615      0.041     14.906      0.000
-    SREG               0.364      0.081      4.525      0.000
+    DISR_INDEX         0.434      0.000    999.000    999.000
+    SREG               0.421      0.069      6.125      0.000
 
 
 QUALITY OF NUMERICAL RESULTS
 
-     Condition Number for the Information Matrix              0.211E-02
+     Condition Number for the Information Matrix              0.115E-01
        (ratio of smallest to largest eigenvalue)
 
 
@@ -301,18 +301,18 @@ STDYX Standardization
 
  SREG     BY
     INIT               0.696      0.048     14.544      0.000
-    INHIB              0.544      0.046     11.853      0.000
+    INHIB              0.544      0.046     11.852      0.000
     CONT               0.744      0.050     14.806      0.000
 
  DISRUPT  BY
-    DISR_INDEX         0.387      0.011     35.049      0.000
+    DISR_INDEX         0.632      0.027     23.356      0.000
 
  SREG     ON
-    DISRUPT           -0.445      0.144     -3.084      0.002
+    DISRUPT           -0.272      0.087     -3.112      0.002
 
  Intercepts
     INIT               3.375      0.110     30.727      0.000
-    INHIB              5.496      0.180     30.533      0.000
+    INHIB              5.496      0.180     30.534      0.000
     CONT               4.623      0.154     29.926      0.000
     DISR_INDEX         3.742      0.115     32.553      0.000
 
@@ -323,8 +323,8 @@ STDYX Standardization
     INIT               0.516      0.067      7.755      0.000
     INHIB              0.704      0.050     14.072      0.000
     CONT               0.447      0.075      5.976      0.000
-    DISR_INDEX         0.851      0.009     99.773      0.000
-    SREG               0.802      0.128      6.248      0.000
+    DISR_INDEX         0.600      0.034     17.525      0.000
+    SREG               0.926      0.048     19.485      0.000
 
 
 STDY Standardization
@@ -334,18 +334,18 @@ STDY Standardization
 
  SREG     BY
     INIT               0.696      0.048     14.544      0.000
-    INHIB              0.544      0.046     11.853      0.000
+    INHIB              0.544      0.046     11.852      0.000
     CONT               0.744      0.050     14.806      0.000
 
  DISRUPT  BY
-    DISR_INDEX         0.387      0.011     35.049      0.000
+    DISR_INDEX         0.632      0.027     23.356      0.000
 
  SREG     ON
-    DISRUPT           -0.445      0.144     -3.084      0.002
+    DISRUPT           -0.272      0.087     -3.112      0.002
 
  Intercepts
     INIT               3.375      0.110     30.727      0.000
-    INHIB              5.496      0.180     30.533      0.000
+    INHIB              5.496      0.180     30.534      0.000
     CONT               4.623      0.154     29.926      0.000
     DISR_INDEX         3.742      0.115     32.553      0.000
 
@@ -356,8 +356,8 @@ STDY Standardization
     INIT               0.516      0.067      7.755      0.000
     INHIB              0.704      0.050     14.072      0.000
     CONT               0.447      0.075      5.976      0.000
-    DISR_INDEX         0.851      0.009     99.773      0.000
-    SREG               0.802      0.128      6.248      0.000
+    DISR_INDEX         0.600      0.034     17.525      0.000
+    SREG               0.926      0.048     19.485      0.000
 
 
 STD Standardization
@@ -367,14 +367,14 @@ STD Standardization
 
  SREG     BY
     INIT               0.674      0.053     12.823      0.000
-    INHIB              0.379      0.037     10.349      0.000
+    INHIB              0.379      0.037     10.348      0.000
     CONT               0.555      0.044     12.584      0.000
 
  DISRUPT  BY
-    DISR_INDEX         0.329      0.000    999.000    999.000
+    DISR_INDEX         0.538      0.038     14.016      0.000
 
  SREG     ON
-    DISRUPT           -0.445      0.144     -3.084      0.002
+    DISRUPT           -0.272      0.087     -3.112      0.002
 
  Intercepts
     INIT               3.270      0.047     70.144      0.000
@@ -389,8 +389,8 @@ STD Standardization
     INIT               0.485      0.064      7.560      0.000
     INHIB              0.341      0.027     12.435      0.000
     CONT               0.249      0.042      5.974      0.000
-    DISR_INDEX         0.615      0.041     14.906      0.000
-    SREG               0.802      0.128      6.248      0.000
+    DISR_INDEX         0.434      0.000    999.000    999.000
+    SREG               0.926      0.048     19.485      0.000
 
 
 R-SQUARE
@@ -401,12 +401,12 @@ R-SQUARE
     INIT               0.484      0.067      7.272      0.000
     INHIB              0.296      0.050      5.926      0.000
     CONT               0.553      0.075      7.403      0.000
-    DISR_IND           0.149      0.009     17.525      0.000
+    DISR_IND           0.400      0.034     11.678      0.000
 
      Latent                                         Two-Tailed
     Variable        Estimate       S.E.  Est./S.E.    P-Value
 
-    SREG               0.198      0.128      1.542      0.123
+    SREG               0.074      0.048      1.556      0.120
 
 
 RESIDUAL OUTPUT
@@ -443,7 +443,7 @@ RESIDUAL OUTPUT
               INIT          INHIB         CONT          DISR_IND
               ________      ________      ________      ________
  INIT           0.939
- INHIB          0.255         0.485
+ INHIB          0.255         0.484
  CONT           0.374         0.210         0.556
  DISR_IND      -0.099        -0.055        -0.081         0.723
 
@@ -479,7 +479,7 @@ RESIDUAL OUTPUT
               INIT          INHIB         CONT          DISR_IND
               ________      ________      ________      ________
  INIT           0.000
- INHIB          0.002         0.000
+ INHIB          0.003         0.047
  CONT          -0.094         0.460         0.000
  DISR_IND      -0.220         0.305         0.000       999.000
 
@@ -488,7 +488,7 @@ RESIDUAL OUTPUT
               INIT          INHIB         CONT          DISR_IND
               ________      ________      ________      ________
  INIT           0.000
- INHIB          0.000         0.000
+ INHIB          0.001         0.000
  CONT          -0.013         0.024         0.000
  DISR_IND      -0.131         0.230         0.000         0.000
 
@@ -520,7 +520,7 @@ TECHNICAL 1 OUTPUT
  INIT               7
  INHIB              0             8
  CONT               0             0             9
- DISR_IND           0             0             0            10
+ DISR_IND           0             0             0             0
 
 
            ALPHA
@@ -532,15 +532,15 @@ TECHNICAL 1 OUTPUT
            BETA
               SREG          DISRUPT
               ________      ________
- SREG               0            11
+ SREG               0            10
  DISRUPT            0             0
 
 
            PSI
               SREG          DISRUPT
               ________      ________
- SREG              12
- DISRUPT            0             0
+ SREG              11
+ DISRUPT            0            12
 
 
      STARTING VALUES
@@ -567,7 +567,7 @@ TECHNICAL 1 OUTPUT
  INIT           0.469
  INHIB          0.000         0.242
  CONT           0.000         0.000         0.278
- DISR_IND       0.000         0.000         0.000         0.361
+ DISR_IND       0.000         0.000         0.000         0.434
 
 
            ALPHA
@@ -587,7 +587,7 @@ TECHNICAL 1 OUTPUT
               SREG          DISRUPT
               ________      ________
  SREG           0.050
- DISRUPT        0.000         0.108
+ DISRUPT        0.000         0.050
 
 
 TECHNICAL 4 OUTPUT
@@ -624,21 +624,21 @@ TECHNICAL 4 OUTPUT
               SREG          DISRUPT
               ________      ________
  SREG           0.454
- DISRUPT       -0.099         0.108
+ DISRUPT       -0.099         0.289
 
 
            S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
               SREG          DISRUPT
               ________      ________
  SREG           0.071
- DISRUPT        0.033         0.000
+ DISRUPT        0.033         0.041
 
 
            EST./S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
               SREG          DISRUPT
               ________      ________
- SREG           6.411
- DISRUPT       -2.984   ***********
+ SREG           6.412
+ DISRUPT       -2.984         7.008
 
 
            TWO-TAILED P-VALUE FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
@@ -652,21 +652,21 @@ TECHNICAL 4 OUTPUT
               SREG          DISRUPT
               ________      ________
  SREG           1.000
- DISRUPT       -0.445         1.000
+ DISRUPT       -0.272         1.000
 
 
            S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
               SREG          DISRUPT
               ________      ________
  SREG           0.000
- DISRUPT        0.144         0.000
+ DISRUPT        0.087         0.000
 
 
            EST./S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
               SREG          DISRUPT
               ________      ________
  SREG         999.000
- DISRUPT       -3.084       999.000
+ DISRUPT       -3.112       999.000
 
 
            TWO-TAILED P-VALUE FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
@@ -676,8 +676,8 @@ TECHNICAL 4 OUTPUT
  DISRUPT        0.002         0.000
 
 
-     Beginning Time:  12:11:22
-        Ending Time:  12:11:22
+     Beginning Time:  13:37:14
+        Ending Time:  13:37:14
        Elapsed Time:  00:00:00
 
 

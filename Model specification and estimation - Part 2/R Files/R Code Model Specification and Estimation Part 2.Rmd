@@ -240,13 +240,13 @@ To demonstrate what happens when reliability is high/low and not accounted for i
 
 In syntax below, the specification for sreg is the same (first line), but we now created a latent variable called "disrupt" that is defined by a single indicator, which is our disrupt_index index (second line). For identification, we need the loading to be 1, which also means that the item is a perfect reflection of our latent variable. 
 
-Then, we specified the variance of the LV to be 0.11595 (third line) and regressed sreg on the new latent variable called disrupt (fourth line)
+Then, we specified the error variance of that observed variable to be 0.11595 (third line) and regressed sreg on the new latent variable called disrupt (fourth line)
 
 ```{r}
 
 habit.sem5 <- 'sreg =~ init + inhib + cont
           disrupt =~ 1*disrupt_index
-          disrupt~~0.11595*disrupt
+          disrupt_index~~0.11595*disrupt_index
           sreg ~ disrupt
           '
 ```
@@ -269,7 +269,7 @@ We can try again with a reliability coefficient of 0.40 by replacing this value 
 
 habit.sem6 <- 'sreg =~ init + inhib + cont
           disrupt =~ 1*disrupt_index
-          disrupt~~0.434*disrupt
+          disrupt_index~~0.434*disrupt_index
           sreg ~ disrupt
           '
 ```
