@@ -1,0 +1,37 @@
+DATA: FILE IS "sem_categorical.dat";
+type is individual; 
+! individual means that each row is one observation, each column is a variable
+
+VARIABLE:
+! Compare this input with the one in R, where we used colnames()
+! Here, we're telling Mplus the names of our variables
+NAMES ARE age sex white child init inhib cont bfi psyeffect sched insec prehabit
+sl exer dt screen sm subs fri work hobby fam;
+
+! Telling Mplus which variables this model will use
+USEVARIABLES ARE init inhib cont psyeffect 
+sched insec;
+
+! Defining the missing data
+Missing are .;
+
+ANALYSIS:
+! MLR is more robust than ML to deviations from normality
+ESTIMATOR IS MLR;
+
+MODEL:
+!latent variables
+disrupt BY psyeffect sched insec;
+sreg BY init inhib cont; 
+
+!covariances
+sreg WITH disrupt;
+
+OUTPUT: 
+SAMPSTAT !asks for sample statistics
+TECH4 ! gives us parameters for the latent variables
+residual ! residuals for model parameters
+standardized ! standardized solution, includes R^2
+TECH1 ! starting values
+;
+

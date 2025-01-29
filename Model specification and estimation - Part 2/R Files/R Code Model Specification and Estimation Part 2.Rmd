@@ -1,0 +1,373 @@
+---
+title: "Estimation & Troubleshooting Errors - categorical edition"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60), tidy=TRUE)
+options(scipen=999)
+
+```
+
+```{r}
+library(lavaan)
+library(dplyr)
+library(DiagrammeR)
+library(lavaanPlot)
+```
+
+# Remember this data? 
+
+```{r}
+habit <- read.table("sem_categorical.dat", header = FALSE)
+head(habit) # Notice that there are no variable names in this dataset
+```
+
+This is the same data as last week's: This is a longer dataset than we used in the last lab, so we'll add column names to the variables. Because we're using the same dataset as the one for Mplus, missing values are still "." At last line of code in this chunk tells R to turn all variables into numeric, which means that the "." (which are character) will be turned into NAs - and that's what we want.
+
+There are other ways to do this, for example: habit[habit == "."] <- NA. This version will convert only "." into NA. If your dataset has qualitative entries that you do not want to remove, this option is safer. t's what we want.
+
+```{r}
+
+colnames(habit) <- c(
+  'age', #participant age (continuous)
+  'sex', #participant sex (m, f)
+  'white', #participant race/ethnicity (white/not white)
+  'child', #children living at home (yes/no)
+  'init', #self-control by initiation
+  'inhib', #self-control by inhibition
+  'cont', #self-control by continuation
+  'bfi',#conscientiousness from the BFI
+  'psyeffect', #psychological effect of outbreak
+  'sched',#schedule changes due to outbreak
+  'insec',#housing, financial insecurity due to outbreak
+  'prehabit', #pre-outbreak habit
+  'sl', #sleep health (decreased, no change, increased)
+  'exer', #exercise (decreased, no change, increased)
+  'dt', #healthy eating behavior (decreased, no change, increased)
+  'screen', #screen time (decreased, no change, increased)
+  'sm', #social media time (decreased, no change, increased)
+  'subs', #substance use (decreased, no change, increased)
+  'fri', #quality time with friends (decreased, no change, increased)
+  'work', #work productivity (decreased, no change, increased)
+  'hobby', #engagement in hobbies (decreased, no change, increased)
+  'fam'#quality time with family (decreased, no change, increased)
+)
+
+habit <- data.frame(lapply(habit, function(x) as.numeric(as.character(x))))
+```
+
+# Model specification
+
+Last week, we estimated the following model:
+
+```{r}
+
+habit.sem <- 'disrupt =~ psyeffect + sched + insec
+          sreg =~ init + inhib + cont + bfi
+          sreg ~~ disrupt
+          '
+```
+
+And answered some questions...
+1. How many latent means/intercepts (one for each latent variable)?
+Answer: 0
+2. How many factor loadings? (remember that some may be fixed)
+Answer: 5 (7 observed variables, but 2 loadings are fixed to 1.0 by default)
+3. How many variances (only on exogenous variables)?
+Answer: 2 (one for sreg, one for disrupt)
+4. How many residual variances (only on endogenous variables)?
+Answer: 7 (one for each indicator)
+5. How many correlations?
+Answer: 1 (between latent factors)
+
+Total number of estimated parameters (i.e., unknowns)? 
+Answer: 15
+
+How many knowns? 
+p = 7, p*(p+1)/2
+7*(7+1)/2 = 28
+
+How many df?
+known - unknwon = 28-15 = 13
+
+Last week, we did not specify what types of variables we were using in this model, which means Mplus and lavaan treated them as continuous. This was fine because these were continuous variables. 
+
+This week, we'll talk more about reading your output and identifying your model parameters.
+
+## This week's model specification
+
+1. Let's start with a model where we have two correlated latent factors. To match the slides from lab, we'll focus on just 3 indicators for each latent variable.
+
+```{r}
+
+habit.sem2 <- 'disrupt =~ psyeffect + sched + insec
+          sreg =~ init + inhib + cont
+          sreg ~~ disrupt
+          '
+```
+
+To estimate the model, we'll do the same as we did last week, and tell lavaan that we want to use MLR or ML as the estimator and that we want to use FIML to account for missing data.
+
+```{r}
+
+cat.fit1 <- sem(
+  model = habit.sem2,
+  data = habit,
+  estimator = "MLR",
+  missing = "FIML" # we have missing data in our endogenous variables 
+)
+
+summary(cat.fit1, fit.measures = TRUE, standardized = TRUE)
+```
+
+As you can see in the output, this model has 8 degrees of freedom:
+
+Known parameters (variances and covariances): 
+p = 6, p*(p+1)/2 = 21
+Unknown (free) parameters = 13:
+* 4 loadings (we have six loadings, but two are fixed to 1.0 for identification and are not estimated/free)
+* 7 residual variances (6 uniquenesses, one for each indicator, and 1 disturbance, one for each endogenous latent variable)
+* 1 variance (of the exogenous latent variable)
+* 1 covariance between the two latent variables
+df = known - unknown = 8
+
+REVIEW: 
+
+As with all other models, when estimating them, the algorithm is trying to find the parameter values that best approximate the observed covariance matrix (your data). A high degree of overlap between the implied and the observed matrices will mean small residuals and better fit. 
+
+Estimation starts with a set of starting values. This guessing has to start somewhere.
+
+```{r}
+lavInspect(cat.fit1, what = "start")
+```
+At the end of the estimation process, you end up with an implied covariance matrix.
+
+```{r}
+lavInspect(cat.fit1, what = "cov.all")
+```
+That is compared with your observed matrix. This process happens throughout estimation, but what we obtain at the end is the result once the model converges.
+
+```{r}
+lavInspect(cat.fit1, what = "sampstat")
+```
+
+You can compute your residuals by hand using these two matrices by subtracting one from the other. The will be some rounding error, but they should match the matrix obtained from the syntax below, which requests the difference between observed and model-implied summary statistics.
+
+```{r}
+lavInspect(cat.fit1, what = "resid")
+```
+
+To compare residual estimates, it's useful to look at the standardized version, as the unstandardiized version will be influenced by the unit of your variables:
+
+```{r}
+lavResiduals(cat.fit1)
+```
+
+2. In this second model, the only change is that the covariance between the latent variables is now a regression coefficient.  
+
+```{r}
+
+habit.sem3 <- 'disrupt =~ psyeffect + sched + insec
+          sreg =~ init + inhib + cont
+          sreg ~ disrupt
+          '
+```
+
+```{r}
+
+cat.fit2 <- sem(
+  model = habit.sem3,
+  data = habit,
+  estimator = "MLR",
+  missing = "FIML" 
+)
+
+summary(cat.fit2, fit.measures = TRUE, standardized = TRUE)
+```
+
+Notice that we still have 8 degrees of freedom, but the parameters estimated have changed. We no longer have a covariance between the latern variables (-1 unknown) and we have a regression path (beta) from disrupt to sreg (+1 unknown).
+
+3. In the next example, imagine that we have some index of disruption that is the average of psyeffect, sched, and insec, and we're using that index (not a latent variable) to predict sreg. we no longer have a latent variable called disrupt, just the observed/manifest 
+
+```{r}
+habit$disrupt_index <- rowMeans(habit[c("psyeffect", 
+                                  "sched", 
+                                  "insec")],na.rm=TRUE)
+```
+
+```{r}
+
+habit.sem4 <- 'sreg =~ init + inhib + cont
+          sreg ~ disrupt_index
+          disrupt_index~~disrupt_index
+          '
+```
+
+```{r}
+
+cat.fit3 <- sem(
+  model = habit.sem4,
+  data = habit,
+  estimator = "MLR",
+  missing = "FIML" 
+)
+
+summary(cat.fit3, fit.measures = TRUE, standardized = TRUE)
+```
+
+First, the output shows that now we have only 2 degrees of freedom. 
+
+Our knowns have changed: p = 4, thus known parameters = 10
+Our unknowns (free parameters) have changed too = 8
+* Loadings = 2 free (1 fixed to 1.0)
+* Regression coefficient = 1
+* Residual variances = 4 (1 for each of 3 indicators, 1 for the endogenous latent variable)
+* Variances = 1 (notice that this parameter will not show in the output if you do not include the line that says disrupt_index~~disrupt_index, but the parameter is being estimated). You can check that with lavInspect().
+
+```{r}
+lavInspect(cat.fit3, "cov.ov")
+```
+
+Also notice that the correlation between sreg and disruption changed when disruption was specified as an observed variable index versus when it was a latent variable. Other portions of the output also changed. The residual variance of sreg has also increased (minutely, but it looks different). 
+
+This change is likely because we're using an observed variable as the predictor (disruption_index), which means that we assume that this variable is a perfect representation of the construct and has no error whatsoever (measurement error, random error). We assume that it is perfectly reliable, which is likely never true. This is also pushing the error downstream, toward the regression coefficient and residual variances.
+
+To account for this unreliability, as discussed on Chapter 7 of the textbook (pp. 136-137; Figure 7.1) you can assume that the observed variable is fully explained by an underlying latent variable plus some error. This error term is computed as (1-reliability coefficient)*variance of the variable.
+
+To demonstrate what happens when reliability is high/low and not accounted for in the model (i.e., it will bias path coefficients and disturbances), let's pretend that reliability of disrupt_index is 0.85. We know the variance of disrupt_index from model's we've estimated, or by using psych::describe(habit$disrupt_index). s2 = 0.773. So the error variance is (1-0.85)*0.723 = 0.11595
+
+In syntax below, the specification for sreg is the same (first line), but we now created a latent variable called "disrupt" that is defined by a single indicator, which is our disrupt_index index (second line). For identification, we need the loading to be 1, which also means that the item is a perfect reflection of our latent variable. 
+
+Then, we specified the error variance of that observed variable to be 0.11595 (third line) and regressed sreg on the new latent variable called disrupt (fourth line)
+
+```{r}
+
+habit.sem5 <- 'sreg =~ init + inhib + cont
+          disrupt =~ 1*disrupt_index
+          disrupt_index~~0.11595*disrupt_index
+          sreg ~ disrupt
+          '
+```
+
+```{r}
+
+cat.fit4 <- sem(
+  model = habit.sem5,
+  data = habit,
+  estimator = "MLR",
+  missing = "FIML" 
+)
+
+summary(cat.fit4, fit.measures = TRUE, standardized = TRUE)
+```
+
+We can try again with a reliability coefficient of 0.40 by replacing this value in the formula, the syntax used above, and re-estimating the model. 
+
+```{r}
+
+habit.sem6 <- 'sreg =~ init + inhib + cont
+          disrupt =~ 1*disrupt_index
+          disrupt_index~~0.434*disrupt_index
+          sreg ~ disrupt
+          '
+```
+
+```{r}
+
+cat.fit5 <- sem(
+  model = habit.sem6,
+  data = habit,
+  estimator = "MLR",
+  missing = "FIML" 
+)
+
+summary(cat.fit5, fit.measures = TRUE, standardized = TRUE)
+```
+
+Notice the changes in parameters from one model to the other. The regression coefficient, for example, has increased with the less unreliable version of disrupt_index.
+
+# Practice - model interpretation and estimation 
+
+For practice, let's move to a different model using the same data. In this model, we want to test whether self-regulation is associated with having stronger pre-pandemic routines ("prehabit" variable). This data is cross-sectional and pre-pandemic routines temporally PRECEDE self-regulation (we're talking about routines back then, and reporting self-regulation now). Self-regulation, however, conceptually precedes habit in this case, because it is a trait. 
+
+Because we have missing data in prehabit (an exogenous variable), we'll ask for its variance so it is treated as endogenous and FIML is applied to it. 
+
+```{r}
+
+practice.sem1 <- '
+          sreg =~ init + inhib + cont + bfi
+          prehabit ~ sreg 
+          prehabit~~prehabit 
+          '
+```
+
+```{r}
+
+practice1 <- sem(
+  model = practice.sem1, # our model
+  data = habit, # the data we're using
+  estimator = "MLR", # estimator
+  missing = "FIML" # how to treat missingness on endogenous variables
+)
+
+summary(practice1, fit.measures = TRUE, standardized = TRUE)
+```
+
+0. Try to draw the path diagram for this model. If you need help getting started, consider the following:
+
+Start with latent variables and their indicators: 
+* How many latent variables are there? Draw their circles/ovals 
+* How many indicators do each of them have? Draw their squares/rectangles near the respective latent variable.
+* If no information was given, assume that indicators they are reflective. If there's information about whether they are reflective or formative, decide to which direction the arrows will point (from the latent to the observed variable or the other way around), then draw them to connect the observed variables and latent variables.
+* Based on the type of indicator, consider whether there should be residuals in the model (formative indicators do not have residuals, but do have correlations between them). Draw those out. If there are residuals, you can either draw a circle for each residual and connect them to the observed variable with an arrow or just draw an arrow pointing at the observed variable and no circle.
+* What is the relationship between the latent variables in the model? Are there regression paths or correlations/covariances between the latent variables? Draw those. Recall that correlations should be noted with curved, double-headed in a diagram. 
+
+If your model has observed variables:
+* Are there relationships between pairs of observed variables (indicators, predictors, outcomes)? If so, draw them out and use the appropriate arrow type.
+
+Now consider:
+* Are there endogenous latent variables in this model (these will have a straight, single-headed arrow pointing at them)? If so, they will have a residual variance, as not all variance can be predicted by the model (endogenous variables are a function of the effects of exogenous variables plus "error"). Draw these residuals as you would for reflective indicators (described above). 
+* Are there exogenous latent variables in this model (these will have no straight, single-headed arrow pointing at them)? If so, these won't have residual variances as they are not predicted by anything, but they will have an estimated variance. Variances are displayed as a curved (nearly a circle) arrow from the variable toward itself.
+
+1. What are the sources of variance of the observed variables init, inhib, cont, and bfi?. 
+
+
+2. Recall that a standardized factor loading is the correlation between a latent variable and the observed variance. The square of that r is the R2, or amount of variance in observed variable X1 that is explained by the factor F1. The standardized residual variance is already in variance "units." Given this knowledge and the sources of variance that you identified in Question 1, what is the total *standardized* variance of the BFI observed variable? What about CONT?
+
+
+3. Now consider all the parameters in the output. Which parameter or parameters seem to be contributing the most to misfit? What gives you that impression? (tip: focus on the relative size of loadings, size of residual variances, size of standard errors relative to the size of the parameter estimate)
+
+
+4. Let's say that we don't believe that self-regulation, even if measured as a trait, precedes people's assessment of their routines. Perhaps having well-established routines helps people get stuff done and shapes their self-assessments of how well they regulate their behaviors. Adjust the model above to accommodate this change, but keep all the other specifications the same. Estimate the model.
+
+```{r}
+
+```
+
+5. Now check the model fit (chi-square, df, other fit indices). What happened to it and why is that? Could you compare these two models to decide on the direction of the relationship between sreg and prehabit? 
+
+6. A final practice exercise that is really a demonstration. Run the chunk below to create an index of self-regulation. Now estimate a model regressing this new self-regulation index (sreg_index) on prehabit (prehabit --> sreg).
+
+```{r}
+habit$sreg_index <- rowMeans(habit[c("init", 
+                                  "inhib", 
+                                  "cont",
+                                  "bfi")],na.rm=TRUE)
+```
+
+Specify model in lavaan language:
+
+```{r}
+
+```
+
+Estimate model and check the output: 
+
+```{r}
+
+```
+
+What you ended up with is a regular linear regression, a perfectly fitting model (there is no error that we're trying to account for; all variables are perfectly reliable) with 0 degrees of freedom (knowns = unknowns). 
+

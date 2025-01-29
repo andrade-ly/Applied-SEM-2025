@@ -1,0 +1,69 @@
+! ***************************************************
+!To demonstrate what happens when reliability is high/low and not accounted for in the 
+!model (i.e., it will bias path coefficients and disturbances), let's pretend that 
+!reliability of disrupt_index is 0.40. We know the variance of disr_index from 
+!model's we've estimated, or by checking your output. 
+!s2 = 0.723. So the error variance is (1-0.40)*0.723 = 0.4338
+!
+!In syntax below, the specification for sreg is the same , but we now 
+!created a latent variable called "disrupt" that is defined by a single indicator, 
+!which is our disrupt_index index. For identification, we need the 
+!loading to be 1, which also means that the item is a perfect reflection of our latent variable. 
+!
+!Then, we specified the error variance of that observed variable to be 0.4338 
+!and regressed sreg on the new latent variable called disrupt 
+! ***************************************************
+
+DATA: FILE IS "sem_categorical.dat";
+type is individual; 
+! individual means that each row is one observation, each column is a variable
+
+VARIABLE:
+! Compare this input with the one in R, where we used colnames()
+! Here, we're telling Mplus the names of our variables
+NAMES ARE age sex white child init inhib cont bfi psyeffect sched insec prehabit
+sl exer dt screen sm subs fri work hobby fam;
+
+
+USEVARIABLES ARE init inhib cont disr_index;
+! Telling Mplus which variables this model will use
+! Add your new variable name up here, at the end
+! remove all other variables, as they won't go in model
+
+
+! Defining the missing data
+Missing are .;
+
+DEFINE:
+
+! Tell Mplus to create the index variable
+
+disr_index = (psyeffect + sched + insec)/3;
+
+ANALYSIS:
+! MLR is more robust than ML to deviations from normality
+ESTIMATOR IS MLR;
+
+MODEL:
+!latent variable
+sreg BY init inhib cont; 
+
+! Add your new latent variable with one indicator disr_index
+! Fix loading to 1
+disrupt BY disr_index@1;
+
+!now sreg is regressed on disrupt (disrupt -> sreg)
+sreg ON disrupt;
+
+!Fix the value of the adjusted variance of disrupt
+disr_index@0.4338;
+
+
+OUTPUT: 
+SAMPSTAT !asks for sample statistics
+TECH4 ! gives us parameters for the latent variables
+residual ! residuals for model parameters
+standardized ! standardized solution, includes R^2
+TECH1 ! starting values
+;
+

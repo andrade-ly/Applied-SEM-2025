@@ -1,0 +1,894 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+01/29/2025   9:57 AM
+
+!**********************************************************************
+! 1. Let's start with a model where we have two correlated latent factors. 
+! To match the slides from lab, we'll focus on just 3 indicators for each latent variable.
+!**********************************************************************
+
+
+INPUT INSTRUCTIONS
+
+  DATA: FILE IS "sem_categorical.dat";
+  type is individual;
+  ! individual means that each row is one observation, each column is a variable
+
+  VARIABLE:
+  ! Compare this input with the one in R, where we used colnames()
+  ! Here, we're telling Mplus the names of our variables
+  NAMES ARE age sex white child init inhib cont bfi psyeffect sched insec prehabit
+  sl exer dt screen sm subs fri work hobby fam;
+
+  ! Telling Mplus which variables this model will use
+  USEVARIABLES ARE init inhib cont psyeffect
+  sched insec;
+
+  ! Defining the missing data
+  Missing are .;
+
+  ANALYSIS:
+  ! MLR is more robust than ML to deviations from normality
+  ESTIMATOR IS MLR;
+
+  MODEL:
+  !latent variables
+  disrupt BY psyeffect sched insec;
+  sreg BY init inhib cont;
+
+  !covariances
+  sreg WITH disrupt;
+
+  OUTPUT:
+  SAMPSTAT !asks for sample statistics
+  TECH4 ! gives us parameters for the latent variables
+  residual ! residuals for model parameters
+  standardized ! standardized solution, includes R^2
+  TECH1 ! starting values
+  ;
+
+
+
+
+*** WARNING in VARIABLE command
+  Note that only the first 8 characters of variable names are used in the output.
+  Shorten variable names to avoid any confusion.
+   1 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         432
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   INIT        INHIB       CONT        PSYEFFECT   SCHED       INSEC
+
+Continuous latent variables
+   DISRUPT     SREG
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+
+Input data file(s)
+  sem_categorical.dat
+
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             2
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT
+
+
+           Covariance Coverage
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           1.000
+ INHIB          1.000         1.000
+ CONT           1.000         1.000         1.000
+ PSYEFFEC       1.000         1.000         1.000         1.000
+ SCHED          1.000         1.000         1.000         1.000         1.000
+ INSEC          0.998         0.998         0.998         0.998         0.998
+
+
+           Covariance Coverage
+              INSEC
+              ________
+ INSEC          0.998
+
+
+SAMPLE STATISTICS
+
+!**********************************************************************
+! Your observed covariance matrix and means
+!**********************************************************************
+
+     ESTIMATED SAMPLE STATISTICS
+
+
+           Means
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+                3.270         3.826         3.448         3.251         3.641
+
+
+           Means
+              INSEC
+              ________
+                2.661
+
+
+           Covariances
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           0.939
+ INHIB          0.255         0.485
+ CONT           0.374         0.211         0.556
+ PSYEFFEC      -0.096        -0.046        -0.085         0.882
+ SCHED         -0.028        -0.038        -0.023         0.476         0.944
+ INSEC         -0.187        -0.053        -0.129         0.492         0.539
+
+
+           Covariances
+              INSEC
+              ________
+ INSEC          1.669
+
+
+           Correlations
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           1.000
+ INHIB          0.379         1.000
+ CONT           0.517         0.406         1.000
+ PSYEFFEC      -0.106        -0.071        -0.122         1.000
+ SCHED         -0.029        -0.056        -0.032         0.522         1.000
+ INSEC         -0.150        -0.059        -0.134         0.405         0.430
+
+
+           Correlations
+              INSEC
+              ________
+ INSEC          1.000
+
+
+     MAXIMUM LOG-LIKELIHOOD VALUE FOR THE UNRESTRICTED (H1) MODEL IS -3200.274
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     INIT                  3.270      -0.129       1.000    1.85%       2.333      3.000      3.333
+             432.000       0.939      -0.674       5.000    5.09%       3.667      4.333
+     INHIB                 3.826      -0.211       2.000    0.93%       3.333      3.667      4.000
+             432.000       0.485      -0.433       5.000    9.26%       4.000      4.333
+     CONT                  3.448      -0.071       1.000    0.23%       2.667      3.333      3.333
+             432.000       0.556      -0.319       5.000    2.55%       3.667      4.000
+     PSYEFFECT             3.251      -0.186       1.000    0.23%       2.375      3.000      3.250
+             432.000       0.882      -0.630       5.000    3.24%       3.500      4.125
+     SCHED                 3.641      -0.640       1.000    1.16%       3.000      3.500      3.800
+             432.000       0.944      -0.080       5.000   11.11%       4.000      4.500
+     INSEC                 2.659       0.287       1.000   17.63%       1.250      2.000      2.500
+             431.000       1.668      -1.147       5.000    7.19%       3.000      4.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+!*********************************************************************************
+!As you can see in the output, this model has 8 degrees of freedom:
+
+!Known parameters (variances and covariances): 
+!p = 6, p*(p+1)/2 = 21
+!Unknown (free) parameters = 13:
+! 4 loadings (we have six loadings, but two are fixed to 1.0 for identification and are not estimated/free)
+! 7 residual variances (6 uniquenesses, one for each indicator, and 1 disturbance, one for each endogenous latent variable)
+! 1 variance (of the exogenous latent variable)
+! 1 covariance between the two latent variables
+!df = known - unknown = 8
+!********************************************************************************
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       19
+
+Loglikelihood
+
+          H0 Value                       -3206.055
+          H0 Scaling Correction Factor      1.0028
+            for MLR
+          H1 Value                       -3200.274
+          H1 Scaling Correction Factor      1.0240
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    6450.110
+          Bayesian (BIC)                  6527.410
+          Sample-Size Adjusted BIC        6467.115
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                             10.765*
+          Degrees of Freedom                     8
+          P-Value                           0.2154
+          Scaling Correction Factor         1.0741
+            for MLR
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.028
+          90 Percent C.I.                    0.000  0.067
+          Probability RMSEA <= .05           0.787
+
+CFI/TLI
+
+          CFI                                0.993
+          TLI                                0.988
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            434.460
+          Degrees of Freedom                    15
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.026
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ DISRUPT  BY
+    PSYEFFECT          1.000      0.000    999.000    999.000
+    SCHED              1.057      0.116      9.108      0.000
+    INSEC              1.130      0.140      8.060      0.000
+
+ SREG     BY
+    INIT               1.000      0.000    999.000    999.000
+    INHIB              0.564      0.068      8.325      0.000
+    CONT               0.824      0.099      8.361      0.000
+
+ SREG     WITH
+    DISRUPT           -0.078      0.033     -2.354      0.019
+
+ Intercepts
+    INIT               3.270      0.047     70.144      0.000
+    INHIB              3.826      0.033    114.233      0.000
+    CONT               3.448      0.036     96.077      0.000
+    PSYEFFECT          3.251      0.045     71.940      0.000
+    SCHED              3.641      0.047     77.870      0.000
+    INSEC              2.661      0.062     42.748      0.000
+
+ Variances
+    DISRUPT            0.447      0.064      6.970      0.000
+    SREG               0.453      0.071      6.346      0.000
+
+ Residual Variances
+    INIT               0.486      0.065      7.510      0.000
+    INHIB              0.340      0.027     12.386      0.000
+    CONT               0.248      0.042      5.879      0.000
+    PSYEFFECT          0.435      0.052      8.329      0.000
+    SCHED              0.445      0.069      6.461      0.000
+    INSEC              1.097      0.101     10.865      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.750E-02
+       (ratio of smallest to largest eigenvalue)
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ DISRUPT  BY
+    PSYEFFECT          0.712      0.042     16.920      0.000
+    SCHED              0.727      0.048     15.057      0.000
+    INSEC              0.585      0.051     11.445      0.000
+
+ SREG     BY
+    INIT               0.695      0.048     14.366      0.000
+    INHIB              0.545      0.046     11.839      0.000
+    CONT               0.744      0.051     14.590      0.000
+
+ SREG     WITH
+    DISRUPT           -0.174      0.068     -2.540      0.011
+
+ Intercepts
+    INIT               3.375      0.110     30.727      0.000
+    INHIB              5.496      0.180     30.533      0.000
+    CONT               4.623      0.154     29.926      0.000
+    PSYEFFECT          3.461      0.115     30.014      0.000
+    SCHED              3.747      0.153     24.460      0.000
+    INSEC              2.060      0.055     37.321      0.000
+
+ Variances
+    DISRUPT            1.000      0.000    999.000    999.000
+    SREG               1.000      0.000    999.000    999.000
+
+ Residual Variances
+    INIT               0.517      0.067      7.697      0.000
+    INHIB              0.703      0.050     13.991      0.000
+    CONT               0.446      0.076      5.882      0.000
+    PSYEFFECT          0.493      0.060      8.223      0.000
+    SCHED              0.471      0.070      6.703      0.000
+    INSEC              0.658      0.060     10.995      0.000
+
+
+STDY Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ DISRUPT  BY
+    PSYEFFECT          0.712      0.042     16.920      0.000
+    SCHED              0.727      0.048     15.057      0.000
+    INSEC              0.585      0.051     11.445      0.000
+
+ SREG     BY
+    INIT               0.695      0.048     14.366      0.000
+    INHIB              0.545      0.046     11.839      0.000
+    CONT               0.744      0.051     14.590      0.000
+
+ SREG     WITH
+    DISRUPT           -0.174      0.068     -2.540      0.011
+
+ Intercepts
+    INIT               3.375      0.110     30.727      0.000
+    INHIB              5.496      0.180     30.533      0.000
+    CONT               4.623      0.154     29.926      0.000
+    PSYEFFECT          3.461      0.115     30.014      0.000
+    SCHED              3.747      0.153     24.460      0.000
+    INSEC              2.060      0.055     37.321      0.000
+
+ Variances
+    DISRUPT            1.000      0.000    999.000    999.000
+    SREG               1.000      0.000    999.000    999.000
+
+ Residual Variances
+    INIT               0.517      0.067      7.697      0.000
+    INHIB              0.703      0.050     13.991      0.000
+    CONT               0.446      0.076      5.882      0.000
+    PSYEFFECT          0.493      0.060      8.223      0.000
+    SCHED              0.471      0.070      6.703      0.000
+    INSEC              0.658      0.060     10.995      0.000
+
+
+STD Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ DISRUPT  BY
+    PSYEFFECT          0.669      0.048     13.939      0.000
+    SCHED              0.707      0.055     12.768      0.000
+    INSEC              0.756      0.072     10.551      0.000
+
+ SREG     BY
+    INIT               0.673      0.053     12.692      0.000
+    INHIB              0.380      0.037     10.340      0.000
+    CONT               0.555      0.045     12.453      0.000
+
+ SREG     WITH
+    DISRUPT           -0.174      0.068     -2.540      0.011
+
+ Intercepts
+    INIT               3.270      0.047     70.144      0.000
+    INHIB              3.826      0.033    114.233      0.000
+    CONT               3.448      0.036     96.077      0.000
+    PSYEFFECT          3.251      0.045     71.940      0.000
+    SCHED              3.641      0.047     77.870      0.000
+    INSEC              2.661      0.062     42.748      0.000
+
+ Variances
+    DISRUPT            1.000      0.000    999.000    999.000
+    SREG               1.000      0.000    999.000    999.000
+
+ Residual Variances
+    INIT               0.486      0.065      7.510      0.000
+    INHIB              0.340      0.027     12.386      0.000
+    CONT               0.248      0.042      5.879      0.000
+    PSYEFFECT          0.435      0.052      8.329      0.000
+    SCHED              0.445      0.069      6.461      0.000
+    INSEC              1.097      0.101     10.865      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    INIT               0.483      0.067      7.183      0.000
+    INHIB              0.297      0.050      5.919      0.000
+    CONT               0.554      0.076      7.295      0.000
+    PSYEFFEC           0.507      0.060      8.460      0.000
+    SCHED              0.529      0.070      7.528      0.000
+    INSEC              0.342      0.060      5.723      0.000
+
+
+RESIDUAL OUTPUT
+
+!**********************************************************************
+! Your residuals
+!**********************************************************************
+
+     ESTIMATED MODEL AND RESIDUALS (OBSERVED - ESTIMATED)
+
+
+           Model Estimated Means
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+                3.270         3.826         3.448         3.251         3.641
+
+
+           Model Estimated Means
+              INSEC
+              ________
+                2.661
+
+
+           Residuals for Means
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           Residuals for Means
+              INSEC
+              ________
+                0.000
+
+!**********************************************************************
+! To compare residual estimates, it's useful to look at the standardized version, 
+! as the unstandardiized version will be influenced by the unit of your variables
+!**********************************************************************
+
+           Standardized Residuals (z-scores) for Means
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           Standardized Residuals (z-scores) for Means
+              INSEC
+              ________
+              999.000
+
+
+           Normalized Residuals for Means
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           Normalized Residuals for Means
+              INSEC
+              ________
+                0.001
+
+
+           Model Estimated Covariances
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           0.939
+ INHIB          0.256         0.485
+ CONT           0.374         0.211         0.556
+ PSYEFFEC      -0.078        -0.044        -0.065         0.882
+ SCHED         -0.083        -0.047        -0.068         0.473         0.944
+ INSEC         -0.088        -0.050        -0.073         0.506         0.534
+
+
+           Model Estimated Covariances
+              INSEC
+              ________
+ INSEC          1.669
+
+
+           Model Estimated Correlations
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           1.000
+ INHIB          0.379         1.000
+ CONT           0.517         0.406         1.000
+ PSYEFFEC      -0.086        -0.067        -0.092         1.000
+ SCHED         -0.088        -0.069        -0.094         0.518         1.000
+ INSEC         -0.071        -0.055        -0.076         0.417         0.426
+
+
+           Model Estimated Correlations
+              INSEC
+              ________
+ INSEC          1.000
+
+
+           Residuals for Covariances
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           0.000
+ INHIB          0.000         0.000
+ CONT           0.000         0.000         0.000
+ PSYEFFEC      -0.018        -0.002        -0.021         0.000
+ SCHED          0.055         0.009         0.045         0.004         0.000
+ INSEC         -0.099        -0.003        -0.056        -0.014         0.005
+
+
+           Residuals for Covariances
+              INSEC
+              ________
+ INSEC          0.000
+
+
+           Residuals for Correlations
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           0.000
+ INHIB          0.000         0.000
+ CONT           0.000         0.000         0.000
+ PSYEFFEC      -0.020        -0.004        -0.030         0.000
+ SCHED          0.058         0.013         0.062         0.004         0.000
+ INSEC         -0.079        -0.003        -0.058        -0.011         0.004
+
+
+           Residuals for Correlations
+              INSEC
+              ________
+ INSEC          0.000
+
+
+!**********************************************************************
+! To compare residual estimates, it's useful to look at the standardized version, 
+! as the unstandardiized version will be influenced by the unit of your variables
+!**********************************************************************
+
+           Standardized Residuals (z-scores) for Covariances
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           0.000
+ INHIB         -0.017         0.000
+ CONT          -0.035         0.358         0.000
+ PSYEFFEC      -0.537        -0.091        -1.023         0.000
+ SCHED          1.629         0.328         2.006       999.000         0.000
+ INSEC         -2.087        -0.076        -1.751        -1.090       999.000
+
+
+           Standardized Residuals (z-scores) for Covariances
+              INSEC
+              ________
+ INSEC          0.035
+
+
+           Normalized Residuals for Covariances
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           0.000
+ INHIB         -0.003         0.000
+ CONT          -0.004         0.009         0.000
+ PSYEFFEC      -0.383        -0.073        -0.611         0.000
+ SCHED          1.180         0.269         1.300         0.077         0.000
+ INSEC         -1.625        -0.067        -1.253        -0.236         0.082
+
+
+           Normalized Residuals for Covariances
+              INSEC
+              ________
+ INSEC          0.001
+
+
+TECHNICAL 1 OUTPUT
+!**********************************************************************
+! This section is telling you the number (not starting value) assigned to each model parameter
+! These sometimes come up in error messages and you have to find them here
+!**********************************************************************
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+                  1             2             3             4             5
+
+
+           NU
+              INSEC
+              ________
+                  6
+
+
+           LAMBDA
+              DISRUPT       SREG
+              ________      ________
+ INIT               0             0
+ INHIB              0             7
+ CONT               0             8
+ PSYEFFEC           0             0
+ SCHED              9             0
+ INSEC             10             0
+
+
+           THETA
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT              11
+ INHIB              0            12
+ CONT               0             0            13
+ PSYEFFEC           0             0             0            14
+ SCHED              0             0             0             0            15
+ INSEC              0             0             0             0             0
+
+
+           THETA
+              INSEC
+              ________
+ INSEC             16
+
+
+           ALPHA
+              DISRUPT       SREG
+              ________      ________
+                  0             0
+
+
+           BETA
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT            0             0
+ SREG               0             0
+
+
+           PSI
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT           17
+ SREG              18            19
+
+!**********************************************************************
+!As with all other models, when estimating them, the algorithm is trying to find the parameter values that best approximate 
+!the observed covariance matrix (your data). A high degree of overlap between the implied and the observed matrices will mean 
+!small residuals and better fit. 
+
+!Estimation starts with a set of starting values. This guessing has to start somewhere.
+! Yoru starting values are here
+!**********************************************************************
+
+     STARTING VALUES
+     
+!**********************************************************************
+! For means: they are the same as the observed means
+!**********************************************************************
+
+           NU
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+                3.270         3.826         3.448         3.251         3.641
+
+
+           NU
+              INSEC
+              ________
+                2.659
+
+!**********************************************************************
+! For loadings: Same as in lavaan
+!**********************************************************************
+
+           LAMBDA
+              DISRUPT       SREG
+              ________      ________
+ INIT           0.000         1.000
+ INHIB          0.000         0.565
+ CONT           0.000         0.826
+ PSYEFFEC       1.000         0.000
+ SCHED          1.097         0.000
+ INSEC          1.132         0.000
+
+
+!**********************************************************************
+! For residuals of observed variables
+!**********************************************************************
+
+           THETA
+              INIT          INHIB         CONT          PSYEFFEC      SCHED
+              ________      ________      ________      ________      ________
+ INIT           0.469
+ INHIB          0.000         0.242
+ CONT           0.000         0.000         0.278
+ PSYEFFEC       0.000         0.000         0.000         0.441
+ SCHED          0.000         0.000         0.000         0.000         0.472
+ INSEC          0.000         0.000         0.000         0.000         0.000
+
+           THETA
+              INSEC
+              ________
+ INSEC          0.834
+
+
+!**********************************************************************
+! For means of latent variables
+!**********************************************************************    
+      
+ 	    ALPHA
+              DISRUPT       SREG
+              ________      ________
+                0.000         0.000
+
+!**********************************************************************
+! For any directional path between latent variables
+!**********************************************************************  
+
+           BETA
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT        0.000         0.000
+ SREG           0.000         0.000
+
+
+!**********************************************************************
+! For variance and covariance of latent variables
+!**********************************************************************
+
+           PSI
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT        0.050
+ SREG           0.000         0.050
+
+
+TECHNICAL 4 OUTPUT
+
+!**********************************************************************
+! Same estimates as you saw in the model
+! Notice how Mplus fixes the means of the LV to 0 in this context
+! Also notice that this section has the model implied estimates
+!**********************************************************************
+
+     ESTIMATES DERIVED FROM THE MODEL
+
+
+           ESTIMATED MEANS FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+                0.000         0.000
+
+
+           S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+                0.000         0.000
+
+
+           EST./S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+                0.000         0.000
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+                1.000         1.000
+
+
+!**********************************************************************
+! Estimated variance and covariance of latent variables
+!**********************************************************************
+
+           ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT        0.447
+ SREG          -0.078         0.453
+
+
+           S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT        0.064
+ SREG           0.033         0.071
+
+
+           EST./S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT        6.970
+ SREG          -2.354         6.346
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT        0.000
+ SREG           0.019         0.000
+
+!**********************************************************************
+! Estimated correlations between latent variables
+!**********************************************************************
+
+           ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT        1.000
+ SREG          -0.174         1.000
+
+
+           S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT        0.000
+ SREG           0.068         0.000
+
+
+           EST./S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT      999.000
+ SREG          -2.540       999.000
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              DISRUPT       SREG
+              ________      ________
+ DISRUPT        0.000
+ SREG           0.011         0.000
+
+
+     Beginning Time:  09:57:15
+        Ending Time:  09:57:15
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

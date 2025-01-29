@@ -1,0 +1,694 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+01/29/2025  10:30 AM
+
+INPUT INSTRUCTIONS
+
+  ! ***************************************************
+  !To demonstrate what happens when reliability is high/low and not accounted for in the
+  !model (i.e., it will bias path coefficients and disturbances), let's pretend that
+  !reliability of disrupt_index is 0.40. We know the variance of disr_index from
+  !model's we've estimated, or by checking your output.
+  !s2 = 0.723. So the error variance is (1-0.40)*0.723 = 0.4638
+  !
+  !In syntax below, the specification for sreg is the same , but we now
+  !created a latent variable called "disrupt" that is defined by a single indicator,
+  !which is our disrupt_index index. For identification, we need the
+  !loading to be 1, which also means that the item is a perfect reflection of our latent var
+  !
+  !Then, we specified the error variance of that observed variable to be 0.4638
+  !and regressed sreg on the new latent variable called disrupt
+  ! ***************************************************
+
+  DATA: FILE IS "sem_categorical.dat";
+  type is individual;
+  ! individual means that each row is one observation, each column is a variable
+
+  VARIABLE:
+  ! Compare this input with the one in R, where we used colnames()
+  ! Here, we're telling Mplus the names of our variables
+  NAMES ARE age sex white child init inhib cont bfi psyeffect sched insec prehabit
+  sl exer dt screen sm subs fri work hobby fam;
+
+
+  USEVARIABLES ARE init inhib cont disr_index;
+  ! Telling Mplus which variables this model will use
+  ! Add your new variable name up here, at the end
+  ! remove all other variables, as they won't go in model
+
+
+  ! Defining the missing data
+  Missing are .;
+
+  DEFINE:
+
+  ! Tell Mplus to create the index variable
+
+  disr_index = (psyeffect + sched + insec)/3;
+
+  ANALYSIS:
+  ! MLR is more robust than ML to deviations from normality
+  ESTIMATOR IS MLR;
+
+  MODEL:
+  !latent variable
+  sreg BY init inhib cont;
+
+  ! Add your new latent variable with one indicator disr_index
+  ! Fix loading to 1
+  disrupt BY disr_index@1;
+
+  !now sreg is regressed on disrupt (disrupt -> sreg)
+  sreg ON disrupt;
+
+  !Fix the value of the variance of disr_index
+  disr_index@0.4638;
+
+
+  OUTPUT:
+  SAMPSTAT !asks for sample statistics
+  TECH4 ! gives us parameters for the latent variables
+  residual ! residuals for model parameters
+  standardized ! standardized solution, includes R^2
+  TECH1 ! starting values
+  ;
+
+
+
+
+*** WARNING
+  Input line exceeded 90 characters. Some input may be truncated.
+  !loading to be 1, which also means that the item is a perfect reflection of our latent vari
+*** WARNING in VARIABLE command
+  Note that only the first 8 characters of variable names are used in the output.
+  Shorten variable names to avoid any confusion.
+   2 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         432
+
+Number of dependent variables                                    4
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   INIT        INHIB       CONT        DISR_INDEX
+
+Continuous latent variables
+   SREG        DISRUPT
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+
+Input data file(s)
+  sem_categorical.dat
+
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             2
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT
+
+
+           Covariance Coverage
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           1.000
+ INHIB          1.000         1.000
+ CONT           1.000         1.000         1.000
+ DISR_IND       0.998         0.998         0.998         0.998
+
+
+SAMPLE STATISTICS
+
+
+     ESTIMATED SAMPLE STATISTICS
+
+
+           Means
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+                3.270         3.826         3.448         3.182
+
+
+           Covariances
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           0.939
+ INHIB          0.255         0.485
+ CONT           0.374         0.211         0.556
+ DISR_IND      -0.104        -0.048        -0.081         0.723
+
+
+           Correlations
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           1.000
+ INHIB          0.379         1.000
+ CONT           0.517         0.406         1.000
+ DISR_IND      -0.126        -0.082        -0.128         1.000
+
+
+     MAXIMUM LOG-LIKELIHOOD VALUE FOR THE UNRESTRICTED (H1) MODEL IS -1962.779
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     INIT                  3.270      -0.129       1.000    1.85%       2.333      3.000      3.333
+             432.000       0.939      -0.674       5.000    5.09%       3.667      4.333
+     INHIB                 3.826      -0.211       2.000    0.93%       3.333      3.667      4.000
+             432.000       0.485      -0.433       5.000    9.26%       4.000      4.333
+     CONT                  3.448      -0.071       1.000    0.23%       2.667      3.333      3.333
+             432.000       0.556      -0.319       5.000    2.55%       3.667      4.000
+     DISR_INDEX            3.182       0.059       1.083    0.23%       2.458      2.875      3.133
+             431.000       0.723      -0.597       5.000    0.70%       3.403      3.958
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       12
+
+Loglikelihood
+
+          H0 Value                       -1962.841
+          H0 Scaling Correction Factor      0.9753
+            for MLR
+          H1 Value                       -1962.779
+          H1 Scaling Correction Factor      0.9972
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    3949.683
+          Bayesian (BIC)                  3998.504
+          Sample-Size Adjusted BIC        3960.422
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              0.111*
+          Degrees of Freedom                     2
+          P-Value                           0.9460
+          Scaling Correction Factor         1.1286
+            for MLR
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.014
+          Probability RMSEA <= .05           0.981
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            208.364
+          Degrees of Freedom                     6
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.004
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ SREG     BY
+    INIT               1.000      0.000    999.000    999.000
+    INHIB              0.562      0.067      8.371      0.000
+    CONT               0.823      0.097      8.483      0.000
+
+ DISRUPT  BY
+    DISR_INDEX         1.000      0.000    999.000    999.000
+
+ SREG     ON
+    DISRUPT           -0.380      0.133     -2.866      0.004
+
+ Intercepts
+    INIT               3.270      0.047     70.144      0.000
+    INHIB              3.826      0.033    114.233      0.000
+    CONT               3.448      0.036     96.077      0.000
+    DISR_INDEX         3.182      0.041     77.671      0.000
+
+ Variances
+    DISRUPT            0.259      0.041      6.280      0.000
+
+ Residual Variances
+    INIT               0.485      0.064      7.562      0.000
+    INHIB              0.341      0.027     12.435      0.000
+    CONT               0.249      0.042      5.971      0.000
+    DISR_INDEX         0.464      0.000    999.000    999.000
+    SREG               0.417      0.069      6.046      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.103E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ SREG     BY
+    INIT               0.696      0.048     14.539      0.000
+    INHIB              0.544      0.046     11.853      0.000
+    CONT               0.744      0.050     14.808      0.000
+
+ DISRUPT  BY
+    DISR_INDEX         0.599      0.031     19.575      0.000
+
+ SREG     ON
+    DISRUPT           -0.287      0.093     -3.106      0.002
+
+ Intercepts
+    INIT               3.375      0.110     30.727      0.000
+    INHIB              5.496      0.180     30.533      0.000
+    CONT               4.622      0.154     29.927      0.000
+    DISR_INDEX         3.742      0.115     32.550      0.000
+
+ Variances
+    DISRUPT            1.000      0.000    999.000    999.000
+
+ Residual Variances
+    INIT               0.516      0.067      7.757      0.000
+    INHIB              0.704      0.050     14.072      0.000
+    CONT               0.447      0.075      5.974      0.000
+    DISR_INDEX         0.642      0.037     17.523      0.000
+    SREG               0.917      0.053     17.257      0.000
+
+
+STDY Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ SREG     BY
+    INIT               0.696      0.048     14.539      0.000
+    INHIB              0.544      0.046     11.853      0.000
+    CONT               0.744      0.050     14.808      0.000
+
+ DISRUPT  BY
+    DISR_INDEX         0.599      0.031     19.575      0.000
+
+ SREG     ON
+    DISRUPT           -0.287      0.093     -3.106      0.002
+
+ Intercepts
+    INIT               3.375      0.110     30.727      0.000
+    INHIB              5.496      0.180     30.533      0.000
+    CONT               4.622      0.154     29.927      0.000
+    DISR_INDEX         3.742      0.115     32.550      0.000
+
+ Variances
+    DISRUPT            1.000      0.000    999.000    999.000
+
+ Residual Variances
+    INIT               0.516      0.067      7.757      0.000
+    INHIB              0.704      0.050     14.072      0.000
+    CONT               0.447      0.075      5.974      0.000
+    DISR_INDEX         0.642      0.037     17.523      0.000
+    SREG               0.917      0.053     17.257      0.000
+
+
+STD Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ SREG     BY
+    INIT               0.674      0.053     12.819      0.000
+    INHIB              0.379      0.037     10.349      0.000
+    CONT               0.555      0.044     12.585      0.000
+
+ DISRUPT  BY
+    DISR_INDEX         0.509      0.041     12.560      0.000
+
+ SREG     ON
+    DISRUPT           -0.287      0.093     -3.106      0.002
+
+ Intercepts
+    INIT               3.270      0.047     70.144      0.000
+    INHIB              3.826      0.033    114.233      0.000
+    CONT               3.448      0.036     96.077      0.000
+    DISR_INDEX         3.182      0.041     77.671      0.000
+
+ Variances
+    DISRUPT            1.000      0.000    999.000    999.000
+
+ Residual Variances
+    INIT               0.485      0.064      7.562      0.000
+    INHIB              0.341      0.027     12.435      0.000
+    CONT               0.249      0.042      5.971      0.000
+    DISR_INDEX         0.464      0.000    999.000    999.000
+    SREG               0.917      0.053     17.257      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    INIT               0.484      0.067      7.269      0.000
+    INHIB              0.296      0.050      5.926      0.000
+    CONT               0.553      0.075      7.404      0.000
+    DISR_IND           0.358      0.037      9.788      0.000
+
+     Latent                                         Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    SREG               0.083      0.053      1.553      0.120
+
+
+RESIDUAL OUTPUT
+
+
+     ESTIMATED MODEL AND RESIDUALS (OBSERVED - ESTIMATED)
+
+
+           Model Estimated Means
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+                3.270         3.826         3.448         3.182
+
+
+           Residuals for Means
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+                0.000         0.000         0.000         0.000
+
+
+           Standardized Residuals (z-scores) for Means
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+                0.000         0.000         0.000         0.069
+
+
+           Normalized Residuals for Means
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+                0.000         0.000         0.000         0.001
+
+
+           Model Estimated Covariances
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           0.939
+ INHIB          0.255         0.485
+ CONT           0.374         0.210         0.556
+ DISR_IND      -0.099        -0.055        -0.081         0.723
+
+
+           Model Estimated Correlations
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           1.000
+ INHIB          0.379         1.000
+ CONT           0.517         0.405         1.000
+ DISR_IND      -0.120        -0.094        -0.128         1.000
+
+
+           Residuals for Covariances
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           0.000
+ INHIB          0.000         0.000
+ CONT           0.000         0.001         0.000
+ DISR_IND      -0.005         0.007         0.000         0.000
+
+
+           Residuals for Correlations
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           0.000
+ INHIB          0.000         0.000
+ CONT          -0.001         0.001         0.000
+ DISR_IND      -0.007         0.012         0.000         0.000
+
+
+           Standardized Residuals (z-scores) for Covariances
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           0.087
+ INHIB          0.009         0.000
+ CONT          -0.089         0.418         0.000
+ DISR_IND      -0.219         0.305         0.003         0.000
+
+
+           Normalized Residuals for Covariances
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           0.001
+ INHIB          0.002         0.000
+ CONT          -0.012         0.022         0.000
+ DISR_IND      -0.131         0.231         0.001         0.000
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+                  1             2             3             4
+
+
+           LAMBDA
+              SREG          DISRUPT
+              ________      ________
+ INIT               0             0
+ INHIB              5             0
+ CONT               6             0
+ DISR_IND           0             0
+
+
+           THETA
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT               7
+ INHIB              0             8
+ CONT               0             0             9
+ DISR_IND           0             0             0             0
+
+
+           ALPHA
+              SREG          DISRUPT
+              ________      ________
+                  0             0
+
+
+           BETA
+              SREG          DISRUPT
+              ________      ________
+ SREG               0            10
+ DISRUPT            0             0
+
+
+           PSI
+              SREG          DISRUPT
+              ________      ________
+ SREG              11
+ DISRUPT            0            12
+
+
+     STARTING VALUES
+
+
+           NU
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+                3.270         3.826         3.448         3.182
+
+
+           LAMBDA
+              SREG          DISRUPT
+              ________      ________
+ INIT           1.000         0.000
+ INHIB          0.565         0.000
+ CONT           0.826         0.000
+ DISR_IND       0.000         1.000
+
+
+           THETA
+              INIT          INHIB         CONT          DISR_IND
+              ________      ________      ________      ________
+ INIT           0.469
+ INHIB          0.000         0.242
+ CONT           0.000         0.000         0.278
+ DISR_IND       0.000         0.000         0.000         0.464
+
+
+           ALPHA
+              SREG          DISRUPT
+              ________      ________
+                0.000         0.000
+
+
+           BETA
+              SREG          DISRUPT
+              ________      ________
+ SREG           0.000         0.000
+ DISRUPT        0.000         0.000
+
+
+           PSI
+              SREG          DISRUPT
+              ________      ________
+ SREG           0.050
+ DISRUPT        0.000         0.050
+
+
+TECHNICAL 4 OUTPUT
+
+
+     ESTIMATES DERIVED FROM THE MODEL
+
+
+           ESTIMATED MEANS FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+                0.000         0.000
+
+
+           S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+                0.000         0.000
+
+
+           EST./S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+                0.000         0.000
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+                1.000         1.000
+
+
+           ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+ SREG           0.454
+ DISRUPT       -0.099         0.259
+
+
+           S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+ SREG           0.071
+ DISRUPT        0.033         0.041
+
+
+           EST./S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+ SREG           6.409
+ DISRUPT       -2.984         6.280
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+ SREG           0.000
+ DISRUPT        0.003         0.000
+
+
+           ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+ SREG           1.000
+ DISRUPT       -0.287         1.000
+
+
+           S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+ SREG           0.000
+ DISRUPT        0.093         0.000
+
+
+           EST./S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+ SREG         999.000
+ DISRUPT       -3.106       999.000
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              SREG          DISRUPT
+              ________      ________
+ SREG           0.000
+ DISRUPT        0.002         0.000
+
+
+     Beginning Time:  10:30:44
+        Ending Time:  10:30:44
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen
