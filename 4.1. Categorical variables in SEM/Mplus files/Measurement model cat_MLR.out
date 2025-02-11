@@ -1,0 +1,483 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+02/07/2025   3:25 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Structural model with endogenous categorical variables
+
+  DATA: FILE IS "sem_categorical.dat";
+  type is individual;
+
+  VARIABLE:
+
+  NAMES ARE age sex white child init inhib cont bfi psyeffect sched insec prehabit
+  sl exer dt screen sm subs fri work hobby fam;
+
+  USEVARIABLES ARE sl exer subs work;
+
+  ! Telling Mplus that these are categorical
+  CATEGORICAL ARE exer sl subs work;
+
+  Missing are .;
+
+  ANALYSIS:
+  ESTIMATOR IS MLR;
+
+  MODEL:
+  !latent variables
+
+  healthb BY exer sl subs work;
+
+  OUTPUT: TECH1 TECH4 residual STDYX;
+
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+Structural model with endogenous categorical variables
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         432
+
+Number of dependent variables                                    4
+Number of independent variables                                  0
+Number of continuous latent variables                            1
+
+Observed dependent variables
+
+  Binary and ordered categorical (ordinal)
+   SL          EXER        SUBS        WORK
+
+Continuous latent variables
+   HEALTHB
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                    STANDARD
+  Number of integration points                                  15
+  Dimensions of numerical integration                            1
+  Adaptive quadrature                                           ON
+Link                                                         LOGIT
+Cholesky                                                        ON
+
+Input data file(s)
+  sem_categorical.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             1
+     Number of y missing data patterns           0
+     Number of u missing data patterns           1
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    SL
+      Category 1    0.361          156.000
+      Category 2    0.350          151.000
+      Category 3    0.289          125.000
+    EXER
+      Category 1    0.431          186.000
+      Category 2    0.255          110.000
+      Category 3    0.315          136.000
+    SUBS
+      Category 1    0.194           84.000
+      Category 2    0.331          143.000
+      Category 3    0.475          205.000
+    WORK
+      Category 1    0.523          226.000
+      Category 2    0.220           95.000
+      Category 3    0.257          111.000
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       12
+
+Loglikelihood
+
+          H0 Value                       -1806.407
+          H0 Scaling Correction Factor      1.0416
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    3636.815
+          Bayesian (BIC)                  3685.636
+          Sample-Size Adjusted BIC        3647.555
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit for the Binary and Ordered Categorical
+(Ordinal) Outcomes
+
+          Pearson Chi-Square
+
+          Value                            100.674
+          Degrees of Freedom                    68
+          P-Value                           0.0062
+
+          Likelihood Ratio Chi-Square
+
+          Value                            107.715
+          Degrees of Freedom                    68
+          P-Value                           0.0015
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ HEALTHB  BY
+    EXER               1.000      0.000    999.000    999.000
+    SL                 1.043      0.512      2.036      0.042
+    SUBS               0.577      0.340      1.696      0.090
+    WORK               2.133      1.087      1.963      0.050
+
+ Thresholds
+    SL$1              -0.630      0.120     -5.236      0.000
+    SL$2               0.995      0.133      7.506      0.000
+    EXER$1            -0.307      0.107     -2.870      0.004
+    EXER$2             0.857      0.119      7.216      0.000
+    SUBS$1            -1.471      0.134    -10.990      0.000
+    SUBS$2             0.100      0.100      1.003      0.316
+    WORK$1             0.117      0.136      0.856      0.392
+    WORK$2             1.441      0.321      4.488      0.000
+
+ Variances
+    HEALTHB            0.456      0.235      1.945      0.052
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.201E-02
+       (ratio of smallest to largest eigenvalue)
+
+
+RESULTS IN PROBABILITY SCALE
+
+                    Estimate
+
+ SL
+    Category 1         0.362
+    Category 2         0.349
+    Category 3         0.289
+ EXER
+    Category 1         0.431
+    Category 2         0.255
+    Category 3         0.314
+ SUBS
+    Category 1         0.194
+    Category 2         0.330
+    Category 3         0.476
+ WORK
+    Category 1         0.521
+    Category 2         0.220
+    Category 3         0.259
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ HEALTHB  BY
+    EXER               0.349      0.079      4.429      0.000
+    SL                 0.362      0.124      2.919      0.004
+    SUBS               0.210      0.101      2.085      0.037
+    WORK               0.622      0.169      3.687      0.000
+
+ Thresholds
+    SL$1              -0.324      0.057     -5.649      0.000
+    SL$2               0.511      0.060      8.521      0.000
+    EXER$1            -0.159      0.055     -2.874      0.004
+    EXER$2             0.443      0.059      7.546      0.000
+    SUBS$1            -0.793      0.068    -11.738      0.000
+    SUBS$2             0.054      0.054      1.003      0.316
+    WORK$1             0.050      0.058      0.871      0.384
+    WORK$2             0.622      0.066      9.455      0.000
+
+ Variances
+    HEALTHB            1.000      0.000    999.000    999.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    SL                 0.131      0.090      1.460      0.144
+    EXER               0.122      0.055      2.215      0.027
+    SUBS               0.044      0.042      1.042      0.297
+    WORK               0.387      0.210      1.843      0.065
+
+
+RESIDUAL OUTPUT
+
+
+     RESIDUAL OUTPUT IS NOT AVAILABLE FOR THIS MODEL.  ADDITIONAL OUTPUT FOR
+     CATEGORICAL, COUNT, AND NOMINAL VARIABLES MAY BE AVAILABLE USING TECH10.
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           TAU
+              SL$1          SL$2          EXER$1        EXER$2        SUBS$1
+              ________      ________      ________      ________      ________
+                    5             6             7             8             9
+
+
+           TAU
+              SUBS$2        WORK$1        WORK$2
+              ________      ________      ________
+                   10            11            12
+
+
+           NU
+              SL            EXER          SUBS          WORK
+              ________      ________      ________      ________
+                    0             0             0             0
+
+
+           LAMBDA
+              HEALTHB
+              ________
+ SL                 1
+ EXER               0
+ SUBS               2
+ WORK               3
+
+
+           THETA
+              SL            EXER          SUBS          WORK
+              ________      ________      ________      ________
+ SL                 0
+ EXER               0             0
+ SUBS               0             0             0
+ WORK               0             0             0             0
+
+
+           ALPHA
+              HEALTHB
+              ________
+                    0
+
+
+           BETA
+              HEALTHB
+              ________
+ HEALTHB            0
+
+
+           PSI
+              HEALTHB
+              ________
+ HEALTHB            4
+
+
+     STARTING VALUES
+
+
+           TAU
+              SL$1          SL$2          EXER$1        EXER$2        SUBS$1
+              ________      ________      ________      ________      ________
+               -0.571         0.899        -0.280         0.778        -1.421
+
+
+           TAU
+              SUBS$2        WORK$1        WORK$2
+              ________      ________      ________
+                0.102         0.093         1.062
+
+
+           NU
+              SL            EXER          SUBS          WORK
+              ________      ________      ________      ________
+                0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              HEALTHB
+              ________
+ SL             1.000
+ EXER           1.000
+ SUBS           1.000
+ WORK           1.000
+
+
+           THETA
+              SL            EXER          SUBS          WORK
+              ________      ________      ________      ________
+ SL             1.000
+ EXER           0.000         1.000
+ SUBS           0.000         0.000         1.000
+ WORK           0.000         0.000         0.000         1.000
+
+
+           ALPHA
+              HEALTHB
+              ________
+                0.000
+
+
+           BETA
+              HEALTHB
+              ________
+ HEALTHB        0.000
+
+
+           PSI
+              HEALTHB
+              ________
+ HEALTHB        0.050
+
+
+TECHNICAL 4 OUTPUT
+
+
+     ESTIMATES DERIVED FROM THE MODEL
+
+
+           ESTIMATED MEANS FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+                0.000
+
+
+           S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+                0.000
+
+
+           EST./S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+                0.000
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+                1.000
+
+
+           ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+ HEALTHB        0.456
+
+
+           S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+ HEALTHB        0.235
+
+
+           EST./S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+ HEALTHB        1.945
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+ HEALTHB        0.052
+
+
+           ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+ HEALTHB        1.000
+
+
+           S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+ HEALTHB        0.000
+
+
+           EST./S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+ HEALTHB      999.000
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              HEALTHB
+              ________
+ HEALTHB        0.000
+
+
+     Beginning Time:  15:25:56
+        Ending Time:  15:25:56
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

@@ -1,0 +1,237 @@
+---
+title: "CFA with Continuation in R"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load library
+
+```{r}
+library(lavaan)
+library(dplyr)
+```
+
+# Load dataset
+
+Note that we don't use all variables in this data set. To model what we did in Mplus (where we selected the variables that we will use in the analysis), we added syntax for creating a new data frame for the CFA. 
+
+You don't need to do this in R though; you can simply specify the variable names in the model section and lavaan will use those variables for the estimation. 
+
+```{r}
+
+cont85 <- read.table("continuation85.dat")
+
+colnames(cont85) <- c(
+  'id',
+  'tfscs1',
+  'tfscs2',
+  'tfscs3',
+  'tfscs4',
+  'tfscs5',
+  'tfscs6',
+  'tfscs7',
+  'tfscs8',
+  'tfscs9',
+  'tfscs10',
+  'tfscs11',
+  'tfscs12',
+  'tfscs13',
+  'tfscs14',
+  'tfscs15',
+  'tfscs16',
+  'tfscs17',
+  'tfscs18',
+  'tfscs19',
+  'tfscs20',
+  'tfscs21',
+  'tfscs22',
+  'tfscs23',
+  'tfscs24',
+  'tfscs25',
+  'tfscs26',
+  'tfscs27',
+  'tfscs28',
+  'tfscs29',
+  'tfscs30',
+  'tfscs31',
+  'tfscs32',
+  'tfscs33',
+  'tfscs34'
+)
+
+cfa_data <- cont85[,c(2, 4:5, 7, 10:13, 15:19, 22:25, 28:29, 32, 34)]
+
+```
+
+# Model specification
+
+```{r Specify the model}
+cfa_model <-
+  '
+  #Inhibition factor
+  inhib =~ 1*tfscs1 + tfscs10 + tfscs15 + 
+            tfscs17 + tfscs22 + tfscs23 + tfscs33
+            
+  #initiation factor
+  init =~ 1*tfscs6 + tfscs11 + tfscs12 + 
+            tfscs18 + tfscs21 + tfscs24 + tfscs27
+            
+  #continuation factor 
+  cont =~ 1*tfscs3 + tfscs4 + tfscs9 + tfscs14 + 
+            tfscs16 + tfscs28 + tfscs31'
+```
+
+# Fitting the model
+
+For simplicity, we'll start with the ML estimator, as it doesn't require adjustments if we need to compare models using the chi-square coefficient.
+
+```{r Run the SEM}
+
+cfa_fit <- cfa(model = cfa_model,
+               data = cfa_data,
+               missing = "ml",
+               estimator = "ml",
+               #se = "boot", # you can request bootstrapped CIs
+               #bootstrap = 500, # the more samples, the longer it takes
+               control = list(iter.max = 1000)
+               )
+
+```
+
+# Output 
+
+## Model summary
+
+This time, we have a new set of instructions in the summary function: modindices = TRUE. With this option, we're asking lavaan to give us the amount by which **freeing** a parameter would increase the model chi-square. The "mi" is the raw amount and the "epc" is the expected percent change in chi-square. 
+
+Lhs just refers to what is on the left-hand side of the operator, or the outcome if you are predicting something. Rhs refers to what is on the right side of the operator, or the predictor. Op is the operator. These are the same as we use to specify the model. 
+
+```{r}
+summary(cfa_fit, 
+        standardized = TRUE, 
+        rsquare = TRUE,
+        fit.measures = TRUE,
+        modindices = TRUE)
+```
+
+### Viewing specific modindices
+
+```{r}
+## You can request specific mod indices, such as the covariances
+mi_cfa <- modindices(cfa_fit)
+mi_cfa %>% filter(op == "~~") %>% arrange(desc(mi))
+```
+Modification indices in lavaan and Mplus are pairwise only (they do not account the multivariate changes in the model caused by changing 1 parameter), so they do not account for what will happen to the model when you free those parameters. This means that the order in which you free them may change how many MIs are large or small. For this reason, you should never change more than 1 parameter at a time based on MI. 
+
+Because each MI is for one parameter, changing it would change the model df by 1 - it would decrease by 1, in fact, as you'd be specifying another unknown. This means MIs are not useful for model comparisons if they are below 3.14, or the critical chi-square at 1 degree of freedom. If the MI is below 3.14, then freeing that parameter will never significantly improve the chi-square fit. As you've seen in lecture, this isn't a good way to go about your model but for demonstration, let's free one parameter to show what happens to the other MIs. 
+
+Finally, note that modindices() are will only consider fixed-to-zero parameters, not parameters that have been constrained between groups, for example.
+
+Let's start with the MI for the correlation between item 16 and item 31 (tfscs16	~~	tfscs31).
+
+```{r Respecify model}
+cfa_model_re <-
+  '
+  #Inhibition factor
+  inhib =~ 1*tfscs1 + tfscs10 + tfscs15 + 
+            tfscs17 + tfscs22 + tfscs23 + tfscs33
+            
+  #initiation factor
+  init =~ 1*tfscs6 + tfscs11 + tfscs12 + 
+            tfscs18 + tfscs21 + tfscs24 + tfscs27
+            
+  #continuation factor 
+  cont =~ 1*tfscs3 + tfscs4 + tfscs9 + tfscs14 + 
+            tfscs16 + tfscs28 + tfscs31
+
+  #add covariance between item 16 and 31, the highest MI above
+  tfscs16	~~	tfscs31'
+```
+
+```{r Re-run the SEM}
+
+cfa_fit_re <- cfa(model = cfa_model_re,
+               data = cfa_data,
+               missing = "ml",
+               estimator = "ml",
+               #se = "boot", # you can request bootstrapped CIs
+               #bootstrap = 500, # the more samples, the longer it takes
+               control = list(iter.max = 1000)
+               )
+
+lavaan::summary(cfa_fit_re, 
+        standardized = TRUE, 
+        rsquare = TRUE,
+        fit.measures = TRUE,
+        modindices = TRUE)
+
+```
+
+First, check the chi-square for this and the previous model. 
+In the previous: 
+  Test statistic                               394.071
+  Degrees of freedom                               186
+  P-value (Chi-square)                           0.000
+  
+In the respecified model: 
+  Test statistic                               372.122
+  Degrees of freedom                               185
+  P-value (Chi-square)                           0.000
+  
+As expected, because we freed a parameter (estimated it when it hadn't been estimated before), we lost df = 1 (186 minus 185).The chi-square has also gone down, from 394.071 to 372.122. That's also what we expected, as the modification indices told us that freeing that parameter would lower chi-square. From a "fit" index perspective, that's desirable but chi-square isn't a good index of fit, so this perspective is less important. From a model comparison perspective, this is good, as the decrease is larger than 3.14 (which we knew it would be, based on the mi output above), which means this model fits significantly better than the previous. 
+
+The change in chi-square is a little different from what we expected though: chi-square change = 394.071 - 372.122 = 21.949, instead of 19.957. That's because a change in a single parameter changes the entire model, so it's not surprising that the chi-square difference is not exactly what we expected. If we were to check the p-value of this change, we'd see that it is indeed significant:
+
+```{r}
+pchisq(21.949, 1, lower.tail = F)
+```
+
+Another interesting piece of information is that the squared z-score for this parameter (the covariance between item 16 and 31) approximates the chi-square change. That's because z^2 approximates a chi-square distribution: -4.510^2 = 20.3401. 
+
+We can compare them using the lavTestLRT() function, which will give you a chi-square difference test and exactly the values that what we computed above for chi-square, dfs, and p-value, with slight differences due to rounding.
+
+```{r}
+lavTestLRT(cfa_fit, cfa_fit_re)
+```
+
+IMPORTANT: These two measurement models have the **exact** same variables, with the only change being how they are related. This means that their covariance matrices are identical. When this is the case, we have a nested model. If we had added a variable to the second model (e.g., tfscs50), the two would no longer be nested and you could not compare them in this way. 
+
+We can also compare them this way because we're using ML estimator. If we had used MLR (with Yuan-Bentler correction) or MLM (with Satorra-Bentler correction), both of which are scaled, we would need to take additional steps before comparing the chi-square coefficients. That's for another lab, but you can see how you can compare the fit of nested models.
+
+Some notation: The model with fewer degrees of freedom is called the "full" model and the one with more degrees of freedom is called the "reduced" model. This sounds unintuitive, but it is not when you consider that the model with fewer degrees of freedom is the more complex one, or a larger number of estimated parameters. Is it full in the sense that more parameters are estimated. The reduced model, on the other hand, has more degrees of freedom because it has fewer estimated parameters (think back to the formula df = known - unknwon of df = p(p+1)/2 - q, where p are the number of observed variables and q is the number of estimated parameters). The reduced model (with fewer parameters) is **nested within** the full model (with more parameters).
+
+# Practice
+
+### Question 1
+For this exercise, for simplicity, estimate a model where only the following loadings are estimated: 
+ 
+  #Inhibition factor
+  inhib =~ 1*tfscs1 + tfscs17 + tfscs23
+            
+  #initiation factor
+  init =~ 1*tfscs6 + tfscs12 + tfscs18 
+            
+  #continuation factor 
+  cont =~ 1*tfscs4 + tfscs9 + tfscs28
+  
+The factors can covary, as they will be allowed to by default because they are latent.  
+How would you specify this model in lavaan so that it is **nested within** the one first one (cfa_model)?  
+
+```{r}
+
+```
+
+### Question 2
+How did fit change between the two models? Look at the chi-square difference first, considering the change in chi-square given the change in number of degrees of freedom. Did fit improve or worsen? Which is the full and which is the reduced model?
+Bonus: Compare other fit indices based on what you've learned in lecture and the book regarding "good fit" for each index.
+
+### Question 3
+If you haven't already, request modification indices. Which parameter has the highest modification index? Test yourself: What does that number mean?
+
+```{r}
+
+```
+

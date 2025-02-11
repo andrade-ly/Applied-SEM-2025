@@ -1,0 +1,219 @@
+---
+title: "Categorical variables in SEM"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60), tidy=TRUE)
+options(scipen=999)
+
+```
+
+```{r}
+library(lavaan)
+library(dplyr)
+library(DiagrammeR)
+library(lavaanPlot)
+```
+
+# Intro 
+
+This week, we'll continue using the sem_categorical.dat dataset.
+
+```{r Load data}
+habit <- read.table("sem_categorical.dat", header = FALSE)
+head(habit) # Notice that there are no variable names in this dataset
+```
+
+```{r Rename columns} 
+
+colnames(habit) <- c(
+  'age', #participant age (continuous)
+  'sex', #participant sex (m, f)
+  'white', #participant race/ethnicity (white/not white)
+  'child', #children living at home (yes/no)
+  'init', #self-control by initiation
+  'inhib', #self-control by inhibition
+  'cont', #self-control by continuation
+  'bfi',#conscientiousness from the BFI
+  'psyeffect', #psychological effect of outbreak
+  'sched',#schedule changes due to outbreak
+  'insec',#housing, financial insecurity due to outbreak
+  'prehabit', #pre-outbreak habit
+  'sl', #sleep health (decreased, no change, increased)
+  'exer', #exercise (decreased, no change, increased)
+  'dt', #healthy eating behavior (decreased, no change, increased)
+  'screen', #screen time (decreased, no change, increased)
+  'sm', #social media time (decreased, no change, increased)
+  'subs', #substance use (decreased, no change, increased)
+  'fri', #quality time with friends (decreased, no change, increased)
+  'work', #work productivity (decreased, no change, increased)
+  'hobby', #engagement in hobbies (decreased, no change, increased)
+  'fam'#quality time with family (decreased, no change, increased)
+)
+
+habit[habit == "."] <- NA #This version will convert only "." into NA. 
+habit <- habit %>%
+  mutate(across(where(is.character), ~ as.numeric(factor(.))))
+```
+
+# Model specification
+
+This week, we'll play with categorical endogenous variables. We'll create two latent variables, each with three categorical indicators. Each categorical variable has 3 levels: decreased (1), no change/did't do & didn't start (2), increased (3).
+
+The first will be health behavior, composed of substance use, exercise, and sleep. The second will be leisure activities, composed of screen time, social media use, and engagement in hobbies.
+
+First, notice that none of these variables are not continuous or normally distributed: We have three categories and their distributions are far from normal. 
+
+```{r Health behavior changes}
+hist(habit$exer)
+hist(habit$sl)
+hist(habit$subs)
+```
+
+```{r Leisure activity changes}
+hist(habit$hobby)
+hist(habit$screen)
+hist(habit$sm)
+```
+
+To demonstrate how variables can influence model fit due to estimator assumptions, let's start by treating these variables as continuous and use ML estimator.
+
+## Model 1
+
+```{r}
+
+habit.sem <- 'beh =~ subs + exer + sl
+          leisure =~ sm + screen + hobby
+          '
+```
+
+```{r}
+
+cont.fit <- sem(
+  model = habit.sem,
+  data = habit,
+  estimator = "ML",
+  missing = "FIML" 
+)
+
+summary(cont.fit, 
+        fit.measures = TRUE, 
+        standardized = TRUE)
+```
+
+The first problem we get is a non-positive definite covariance matrix and a suggestion to use lavInspect(cont.fit, "cov.lv") to investigate the issue. Besides the fact that these covariances and variances are small, this suggestion wasn't very helpful.
+
+```{r}
+lavInspect(cont.fit, "cov.lv")
+lavResiduals(cont.fit)
+```
+
+Instead, check the output. Fist, you'll notice that fit is poor. Second, we have very small loadings on all categorical latent variables. Third, and most important, we have a correlation larger than 1 for the two latent variables, which you can see in this line:
+
+                 Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+Covariances:
+                   Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+  beh ~~                                                                
+    leisure           0.047    0.018    2.572    0.010    1.080    1.080
+
+Recall that Estimate refers to the unstandardized estimate (i.e., covariance) and that Std.all refers to the standardized estimate when both X1 and X2Y are standardized (i.e., correlation). We know this is an indication of problems with the model. The most likely reason is that we're using ML and violating its assumption of normality because our data is categorical (and most certainly not normal).
+
+# Model 2
+
+Instead, let's estimate this model by treating these variables as categorical. The model statement is the same, we only need to make changes to the estimation part by adding "ordered" to the sem() command. 
+Recall that:
+- lavaan cannot use FIML with categorical data
+- lavaan cannot handle nominal data, so we're treating our variables as ordinal for demonstration
+- In Mplus, we could use WLSMV or MLR with categorical data. Only WLSMV is available in lavaan. 
+
+```{r}
+
+cat.fit <- sem(
+  model = habit.sem,
+  data = habit,
+  estimator = "WLSMV",
+  ordered = c("sl", "exer", "subs", "sm", "screen", "hobby") 
+)
+
+summary(cat.fit, 
+        fit.measures = TRUE, 
+        standardized = TRUE)
+```
+
+The model still has serious problems, which is not surprising given that the levels of these categorical variables are not ordered. Still, you can see some changes in the fit indices simply because of the estimator being used and how we're treating our variables.
+
+Let's go with a simpler model. In this one, which can be estimated without errors regardless of the estimator we choose (I had to pick some variables that had similar distributions for this to work), the fit is more clearly different when we use an estimator that does not vs. does accommodate deviations from normality.
+
+```{r}
+
+habit.sem2 <- 'beh =~ exer + sl + subs + work
+          '
+```
+
+```{r}
+
+cont.fit1 <- sem(
+  model = habit.sem2,
+  data = habit,
+  estimator = "ML"
+)
+
+summary(cont.fit1, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+
+cat.fit1 <- sem(
+  model = habit.sem2,
+  data = habit,
+  estimator = "WLSMV",
+  ordered = c("sl", "subs", "exer", "work")
+)
+
+summary(cat.fit1, fit.measures = TRUE, standardized = TRUE)
+```
+We have something different in this output: 
+Thresholds:
+                   Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+    exer|t1          -0.175    0.061   -2.882    0.004   -0.175   -0.175
+    exer|t2           0.482    0.063    7.656    0.000    0.482    0.482
+
+Thresholds are the logit/probit values of a latent value that separate between being in category 1 and category 2, category 2 and category 3, and so on. There will always be one fewer threshold than the number of levels of the variable. These are like cut-off points or boundaries between different levels of the categorical variable. 
+
+Compare the thresholds for subs and work. You can see that the level of the latent variable for going from category 1 (decreased) to category 2 (no change) is much lower for substance use than for work. You can also see that the level for going from category 2 (no change) to category 3 (increased) is much higher for work than for substance use. In other words, an average participant, who would have a latent variable score of 0 (the mean), would more likely indicate that their substance did not change and that their work productivity decreased. 
+
+# A brief practice - model interpretation 
+
+For practice, let's add to the previous model. In this new model, we want to test whether self-regulation (see scripts from a couple of labs ago if needed) predicts behavior change from pre-to-during the pandemic. Do not worry about theory, focus on the values and what you know about latent variables and regression. 
+
+How would you interpret the latent factor for behavior (or the Y variable)? Tip: consider the direction of the indicators and whether higher values are better or worse for health, consider how you'd name this variable or describe it on a manuscript ("higher values on this latent variable reflect...")
+
+```{r}
+
+practice.sem1 <- '
+          # latent factor for behavior
+          beh =~ exer + sl + subs + work
+          sreg =~ init + inhib + cont + bfi
+          beh ~ sreg 
+          '
+```
+
+```{r}
+
+practice1 <- sem(
+  model = practice.sem1,
+  data = habit,
+  estimator = "WLSMV",
+  ordered = c("sl", "subs", "exer", "work")
+)
+
+summary(practice1, 
+        fit.measures = TRUE, 
+        standardized = TRUE)
+```
+
+If you're not confused yet, consider: what does the observed effect of self-regulation (X) on behavior (Y) mean? Tip: Try to interpret it as you would interpret the results of a regression (e.g., a one unit increase in X means a ___ unit increase/decrease in ___)
+
+Finally, the model seems to fit the data well, but is it useful?

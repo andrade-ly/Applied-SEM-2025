@@ -1,0 +1,28 @@
+TITLE: Structural model with endogenous categorical variables
+
+DATA: FILE IS "sem_categorical.dat";
+type is individual;
+
+VARIABLE:
+
+NAMES ARE age sex white child init inhib cont bfi psyeffect sched insec prehabit
+sl exer dt screen sm subs fri work hobby fam;
+
+USEVARIABLES ARE sl exer subs work;
+
+! Telling Mplus that these are categorical
+CATEGORICAL ARE exer sl subs work;
+
+Missing are .;
+
+ANALYSIS:
+ESTIMATOR IS WLSMV;
+! With MLR, estimates are in logit units
+
+MODEL:
+!latent variables
+
+healthb BY exer sl subs work;
+
+OUTPUT: SAMPSTAT TECH1 TECH4 residual STDYX;
+
