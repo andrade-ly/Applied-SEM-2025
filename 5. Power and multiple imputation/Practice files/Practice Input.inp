@@ -1,0 +1,33 @@
+DATA: 
+FILE = practice.csv;
+
+VARIABLE:
+NAMES = y1-y7 x1-x6;
+USEVARIABLES = y1-y7 x1-x2;
+MISSING = .;
+
+ANALYSIS:
+type = general;
+estimator = MLR;
+
+MODEL: 
+! latent variables
+f1 BY y1* y2-y4;
+f2 BY y5* y6-y7;
+
+! regressions
+f2 on f1 x1 x2;
+
+! variances
+f1@1;
+f2@1;
+
+! covariances
+
+f1 with x1@0 x2;
+x1 with x2;
+
+y3 with y4;
+
+OUTPUT:
+standardized modindices tech1 tech4;
