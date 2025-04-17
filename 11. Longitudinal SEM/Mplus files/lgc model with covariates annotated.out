@@ -1,0 +1,454 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/15/2025   2:40 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: HK Cancer Study
+      Latent Growth Curve
+      Model with Covariates;
+  !now we are trying to explain the heterogeneity
+  !i.e., the interindividual differences
+
+  DATA: file=hkcancer_red2.dat;
+
+  variable:
+  NAMES = AGE_GP SURG_TX mood2 mood3 mood4
+  socadj2 socadj3 socadj4 age age2 surg_tx2;
+  !these new variables are our predictor variables
+
+  USEVARIABLES = mood2 mood3 mood4 socadj2
+  socadj3 socadj4 age2 surg_tx2;
+
+  MISSING IS *;
+  !telling Mplus how our missing data is identified;
+
+  Analysis:
+  estimator IS MLR;
+  !using MLR estimator - std. errors are robust -
+  !bc of missing data;
+
+  Model:
+
+  !this is the same as before
+  I1 by mood2@1 mood3@1 mood4@1;
+  !intercept for mood (I1) is measured by mood2 mood3 mood4;
+
+  S1 by mood2@0 mood3@1 mood4@2.33;
+  !slope for mood (I1) is measured by mood2 mood3 mood4;
+
+  I2 by socadj2@1 socadj3@1 socadj4@1;
+  !intercept for social adjustment (I2) is measured by
+  !socadj2 socadj3 socadj4
+
+  S2 by socadj2@0 socadj3@1 socadj4@2.33;
+  !slope for social adjustment (I2) is measured by
+  !socadj2 socadj3 socadj4
+
+  [mood2-mood4@0];
+  [socadj2-socadj4@0];
+  !groups variables as outcomes in model
+  !@0 specification relates to intercepts of variables, fixed
+  !to zero by default
+
+  [I1 S1]
+  !intercept & slope for mood serve as a set of parameters in model
+  [I2 S2];
+  !ditto for intercept & slope for social adjustment
+
+  I1 S1 on age2 surg_tx2;
+  I2 S2 on age2 surg_tx2;
+  !specified predictor regression paths
+  !including these new predictors to try to explain
+  !the interindividual differences
+
+
+  Output: stdyx;
+
+
+
+*** WARNING
+  Data set contains cases with missing on all variables except
+  x-variables.  These cases were not included in the analysis.
+  Number of cases with missing on all variables except x-variables:  19
+   1 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+HK Cancer Study
+Latent Growth Curve
+Model with Covariates;
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         386
+
+Number of dependent variables                                    6
+Number of independent variables                                  2
+Number of continuous latent variables                            4
+
+Observed dependent variables
+
+  Continuous
+   MOOD2       MOOD3       MOOD4       SOCADJ2     SOCADJ3     SOCADJ4
+
+Observed independent variables
+   AGE2        SURG_TX2
+
+Continuous latent variables
+   I1          S1          I2          S2
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+
+Input data file(s)
+  hkcancer_red2.dat
+
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns            15
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT
+
+
+           Covariance Coverage
+              MOOD2         MOOD3         MOOD4         SOCADJ2       SOCADJ3
+              ________      ________      ________      ________      ________
+ MOOD2          0.959
+ MOOD3          0.834         0.860
+ MOOD4          0.855         0.813         0.883
+ SOCADJ2        0.959         0.837         0.858         0.964
+ SOCADJ3        0.842         0.858         0.821         0.845         0.870
+ SOCADJ4        0.865         0.819         0.883         0.868         0.829
+ AGE2           0.959         0.860         0.883         0.964         0.870
+ SURG_TX2       0.959         0.860         0.883         0.964         0.870
+
+
+           Covariance Coverage
+              SOCADJ4       AGE2          SURG_TX2
+              ________      ________      ________
+ SOCADJ4        0.894
+ AGE2           0.894         1.000
+ SURG_TX2       0.894         1.000         1.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     MOOD2                21.370       0.928      12.000    1.08%      16.000     18.000     20.000
+             370.000      40.147       0.478      44.000    0.27%      22.000     27.000
+     MOOD3                20.985       0.929      12.000    0.60%      16.000     18.000     19.000
+             332.000      41.418       0.097      43.000    0.30%      21.000     27.000
+     MOOD4                20.000       1.185      12.000    1.76%      15.000     17.000     18.000
+             341.000      34.557       1.223      47.000    0.29%      19.000     25.000
+     SOCADJ2             100.911      -0.951      33.000    0.27%      94.000     99.000    101.062
+             372.000      94.777       6.384     132.000    0.27%     103.125    107.800
+     SOCADJ3             100.424      -0.024      51.857    0.30%      93.677     99.000    100.031
+             336.000      99.828       3.103     145.200    0.30%     102.000    107.556
+     SOCADJ4             100.599      -0.175      64.821    0.29%      95.000     99.000    100.222
+             345.000      75.783       2.439     133.138    0.29%     102.094    106.615
+     AGE2                  0.477       0.093       0.000   52.33%       0.000      0.000      0.000
+             386.000       0.249      -1.991       1.000   47.67%       1.000      1.000
+     SURG_TX2              0.795      -1.464       0.000   20.47%       0.000      1.000      1.000
+             386.000       0.163       0.143       1.000   79.53%       1.000      1.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       28
+
+Loglikelihood
+
+          H0 Value                       -6849.812
+          H0 Scaling Correction Factor      1.4748
+            for MLR
+          H1 Value                       -6828.259
+          H1 Scaling Correction Factor      1.3525
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                   13755.624
+          Bayesian (BIC)                 13866.388
+          Sample-Size Adjusted BIC       13777.547
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                             41.402*
+          Degrees of Freedom                    11
+          P-Value                           0.0000
+          Scaling Correction Factor         1.0412
+            for MLR
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.085
+          90 Percent C.I.                    0.058  0.113
+          Probability RMSEA <= .05           0.018
+
+CFI/TLI
+
+          CFI                                0.952
+          TLI                                0.883
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            665.564
+          Degrees of Freedom                    27
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.072
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ I1       BY
+    MOOD2              1.000      0.000    999.000    999.000
+    MOOD3              1.000      0.000    999.000    999.000
+    MOOD4              1.000      0.000    999.000    999.000
+
+ S1       BY
+    MOOD2              0.000      0.000    999.000    999.000
+    MOOD3              1.000      0.000    999.000    999.000
+    MOOD4              2.330      0.000    999.000    999.000
+
+ I2       BY
+    SOCADJ2            1.000      0.000    999.000    999.000
+    SOCADJ3            1.000      0.000    999.000    999.000
+    SOCADJ4            1.000      0.000    999.000    999.000
+
+ S2       BY
+    SOCADJ2            0.000      0.000    999.000    999.000
+    SOCADJ3            1.000      0.000    999.000    999.000
+    SOCADJ4            2.330      0.000    999.000    999.000
+
+ I1       ON
+    AGE2              -1.604      0.626     -2.564      0.010
+!age as a significant predictor of initial mood
+!mood scores lower for older women at time 1 (lower mood scores
+!=more positive mood) 
+    SURG_TX2          -0.123      0.757     -0.163      0.870
+!but didn't vary based on type of surgery
+
+ S1       ON
+    AGE2              -0.214      0.261     -0.821      0.411
+    SURG_TX2          -0.326      0.336     -0.971      0.332
+!differences in slopes (i.e., rate of change) of mood were
+!not significant across age groups or surgery type
+
+ I2       ON
+    AGE2              -0.963      0.989     -0.974      0.330
+!age not a significant predictor of initial status on soc adj
+    SURG_TX2          -3.242      1.052     -3.081      0.002
+!but, surgery type was a significant predictor of initial 
+!status on social adjustment, such that those undergoing a 
+!mastectomy had lower social adjustment
+
+ S2       ON
+    AGE2               0.368      0.406      0.907      0.365
+!age not a significant predictor of slopes (i.e., rate of 
+!change) on social adjustment
+    SURG_TX2           1.239      0.487      2.545      0.011
+!but surgery type was a significant predictor. mastectomy 
+!had faster rate of change in social adjustment relative to
+!other surgery 
+
+ S1       WITH
+    I1                -2.005      1.640     -1.223      0.221
+
+ I2       WITH
+    I1               -23.826      3.909     -6.096      0.000
+    S1                 1.807      1.739      1.039      0.299
+
+ S2       WITH
+    I1                 2.483      1.534      1.618      0.106
+    S1                -1.391      0.746     -1.865      0.062
+    I2               -12.652      4.530     -2.793      0.005
+
+ Intercepts
+    MOOD2              0.000      0.000    999.000    999.000
+    MOOD3              0.000      0.000    999.000    999.000
+    MOOD4              0.000      0.000    999.000    999.000
+    SOCADJ2            0.000      0.000    999.000    999.000
+    SOCADJ3            0.000      0.000    999.000    999.000
+    SOCADJ4            0.000      0.000    999.000    999.000
+    I1                22.313      0.744     29.997      0.000
+    S1                -0.214      0.318     -0.671      0.502
+    I2               103.902      1.040     99.865      0.000
+    S2                -1.418      0.454     -3.126      0.002
+
+ Residual Variances
+    MOOD2             14.813      3.417      4.335      0.000
+    MOOD3             18.453      2.483      7.432      0.000
+    MOOD4              7.196      3.875      1.857      0.063
+    SOCADJ2           16.999      7.678      2.214      0.027
+    SOCADJ3           38.376      6.963      5.511      0.000
+    SOCADJ4            7.789     11.387      0.684      0.494
+    I1                25.026      3.588      6.975      0.000
+    S1                 2.086      1.267      1.647      0.100
+    I2                77.450     12.258      6.318      0.000
+    S2                 9.958      3.466      2.873      0.004
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.115E-04
+       (ratio of smallest to largest eigenvalue)
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ I1       BY
+    MOOD2              0.796      0.049     16.375      0.000
+    MOOD3              0.778      0.044     17.526      0.000
+    MOOD4              0.851      0.062     13.621      0.000
+
+ S1       BY
+    MOOD2              0.000      0.000    999.000    999.000
+    MOOD3              0.223      0.065      3.412      0.001
+    MOOD4              0.569      0.179      3.187      0.001
+
+ I2       BY
+    SOCADJ2            0.908      0.039     23.332      0.000
+    SOCADJ3            0.886      0.055     16.232      0.000
+    SOCADJ4            0.994      0.083     12.037      0.000
+
+ S2       BY
+    SOCADJ2            0.000      0.000    999.000    999.000
+    SOCADJ3            0.318      0.048      6.628      0.000
+    SOCADJ4            0.832      0.155      5.360      0.000
+
+ I1       ON
+    AGE2              -0.158      0.060     -2.618      0.009
+    SURG_TX2          -0.010      0.060     -0.163      0.870
+
+ S1       ON
+    AGE2              -0.074      0.092     -0.796      0.426
+    SURG_TX2          -0.091      0.093     -0.970      0.332
+
+ I2       ON
+    AGE2              -0.054      0.054     -0.991      0.322
+    SURG_TX2          -0.147      0.046     -3.188      0.001
+
+ S2       ON
+    AGE2               0.057      0.066      0.877      0.381
+    SURG_TX2           0.156      0.063      2.464      0.014
+
+ S1       WITH
+    I1                -0.277      0.154     -1.796      0.072
+
+ I2       WITH
+    I1                -0.541      0.092     -5.861      0.000
+    S1                 0.142      0.141      1.009      0.313
+
+ S2       WITH
+    I1                 0.157      0.097      1.624      0.104
+    S1                -0.305      0.183     -1.670      0.095
+    I2                -0.456      0.101     -4.522      0.000
+
+ Intercepts
+    MOOD2              0.000      0.000    999.000    999.000
+    MOOD3              0.000      0.000    999.000    999.000
+    MOOD4              0.000      0.000    999.000    999.000
+    SOCADJ2            0.000      0.000    999.000    999.000
+    SOCADJ3            0.000      0.000    999.000    999.000
+    SOCADJ4            0.000      0.000    999.000    999.000
+    I1                 4.404      0.319     13.823      0.000
+    S1                -0.147      0.227     -0.646      0.518
+    I2                11.661      0.910     12.810      0.000
+    S2                -0.443      0.161     -2.756      0.006
+
+ Residual Variances
+    MOOD2              0.366      0.077      4.725      0.000
+    MOOD3              0.435      0.045      9.597      0.000
+    MOOD4              0.203      0.106      1.914      0.056
+    SOCADJ2            0.176      0.071      2.498      0.012
+    SOCADJ3            0.379      0.050      7.627      0.000
+    SOCADJ4            0.097      0.141      0.688      0.491
+    I1                 0.975      0.019     51.051      0.000
+    S1                 0.986      0.021     47.920      0.000
+    I2                 0.976      0.015     66.091      0.000
+    S2                 0.972      0.021     46.033      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    MOOD2              0.634      0.077      8.188      0.000
+    MOOD3              0.565      0.045     12.460      0.000
+    MOOD4              0.797      0.106      7.511      0.000
+    SOCADJ2            0.824      0.071     11.666      0.000
+    SOCADJ3            0.621      0.050     12.490      0.000
+    SOCADJ4            0.903      0.141      6.413      0.000
+
+     Latent                                         Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    I1                 0.025      0.019      1.314      0.189
+    S1                 0.014      0.021      0.659      0.510
+    I2                 0.024      0.015      1.653      0.098
+    S2                 0.028      0.021      1.309      0.191
+
+
+     Beginning Time:  14:40:48
+        Ending Time:  14:40:48
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

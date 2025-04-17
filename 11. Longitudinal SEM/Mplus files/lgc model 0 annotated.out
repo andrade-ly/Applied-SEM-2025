@@ -1,0 +1,384 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/15/2025   2:34 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE: HK Cancer Study
+      Latent Growth Curve - intercept-only model;
+
+  DATA: file=hkcancer_red2.dat;
+
+  variable:
+  NAMES = AGE_GP SURG_TX mood2 mood3 mood4
+  socadj2 socadj3 socadj4 age age2 surg_tx2;
+
+  USEVARIABLES = mood2 mood3 mood4 socadj2
+  socadj3 socadj4;
+
+  MISSING IS *;
+  !telling Mplus how our missing data is identified;
+
+  Analysis:
+  estimator IS MLR;
+  !using MLR estimator - std. errors are robust -
+  !bc of missing data;
+
+  Model:
+
+  I1 by mood2@1 mood3@1 mood4@1;
+  !intercept for mood (I1) is measured by mood2 mood3 mood4;
+
+  I2 by socadj2@1 socadj3@1 socadj4@1;
+  !intercept for social adjustment (I2) is measured by
+  !socadj2 socadj3 socadj4
+
+  [mood2-mood4@0];
+  [socadj2-socadj4@0];
+  !groups variables as outcomes in model
+  !@0 specification relates to intercepts of variables, fixed
+  !to zero by default
+
+  [I1]
+  !intercept for mood serve as a set of parameters in model
+  [I2];
+  !ditto for intercept for social adjustment
+
+  Output: patterns sampstat modindices;
+
+  plot: type = plot1;
+  series is mood2-mood4 (I1) | socadj2-socadj4 (I2);
+
+
+
+*** WARNING
+  Data set contains cases with missing on all variables.
+  These cases were not included in the analysis.
+  Number of cases with missing on all variables:  19
+   1 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+HK Cancer Study
+Latent Growth Curve Initial Model;
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         386
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   MOOD2       MOOD3       MOOD4       SOCADJ2     SOCADJ3     SOCADJ4
+
+Continuous latent variables
+   I1          I2
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+
+Input data file(s)
+  hkcancer_red2.dat
+
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns            15
+
+
+SUMMARY OF MISSING DATA PATTERNS
+
+
+     MISSING DATA PATTERNS (x = not missing)
+
+           1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+ MOOD2     x  x  x  x  x  x  x  x  x
+ MOOD3     x  x  x  x                 x  x  x
+ MOOD4     x           x  x           x  x     x
+ SOCADJ2   x  x  x  x  x  x  x  x  x  x           x
+ SOCADJ3   x  x  x     x     x        x  x  x        x
+ SOCADJ4   x  x        x  x  x  x     x  x     x
+
+
+     MISSING DATA PATTERN FREQUENCIES
+
+    Pattern   Frequency     Pattern   Frequency     Pattern   Frequency
+          1         307           6          20          11           6
+          2           2           7           1          12           3
+          3          12           8           1          13           4
+          4           1           9          23          14           1
+          5           3          10           1          15           1
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT
+
+
+           Covariance Coverage
+              MOOD2         MOOD3         MOOD4         SOCADJ2       SOCADJ3
+              ________      ________      ________      ________      ________
+ MOOD2          0.959
+ MOOD3          0.834         0.860
+ MOOD4          0.855         0.813         0.883
+ SOCADJ2        0.959         0.837         0.858         0.964
+ SOCADJ3        0.842         0.858         0.821         0.845         0.870
+ SOCADJ4        0.865         0.819         0.883         0.868         0.829
+
+
+           Covariance Coverage
+              SOCADJ4
+              ________
+ SOCADJ4        0.894
+
+
+SAMPLE STATISTICS
+
+
+     ESTIMATED SAMPLE STATISTICS
+
+
+           Means
+              MOOD2         MOOD3         MOOD4         SOCADJ2       SOCADJ3
+              ________      ________      ________      ________      ________
+               21.336        21.140        20.070       101.024        99.928
+
+
+           Means
+              SOCADJ4
+              ________
+              100.320
+
+
+           Covariances
+              MOOD2         MOOD3         MOOD4         SOCADJ2       SOCADJ3
+              ________      ________      ________      ________      ________
+ MOOD2         40.260
+ MOOD3         24.144        43.161
+ MOOD4         21.051        24.510        35.351
+ SOCADJ2      -22.352       -19.480       -17.693        94.987
+ SOCADJ3      -23.924       -31.640       -21.667        69.774       108.343
+ SOCADJ4      -18.018       -18.610       -21.081        47.228        61.547
+
+
+           Covariances
+              SOCADJ4
+              ________
+ SOCADJ4       79.812
+
+
+           Correlations
+              MOOD2         MOOD3         MOOD4         SOCADJ2       SOCADJ3
+              ________      ________      ________      ________      ________
+ MOOD2          1.000
+ MOOD3          0.579         1.000
+ MOOD4          0.558         0.627         1.000
+ SOCADJ2       -0.361        -0.304        -0.305         1.000
+ SOCADJ3       -0.362        -0.463        -0.350         0.688         1.000
+ SOCADJ4       -0.318        -0.317        -0.397         0.542         0.662
+
+
+           Correlations
+              SOCADJ4
+              ________
+ SOCADJ4        1.000
+
+
+     MAXIMUM LOG-LIKELIHOOD VALUE FOR THE UNRESTRICTED (H1) MODEL IS -6845.291
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     MOOD2                21.370       0.928      12.000    1.08%      16.000     18.000     20.000
+             370.000      40.147       0.478      44.000    0.27%      22.000     27.000
+     MOOD3                20.985       0.929      12.000    0.60%      16.000     18.000     19.000
+             332.000      41.418       0.097      43.000    0.30%      21.000     27.000
+     MOOD4                20.000       1.185      12.000    1.76%      15.000     17.000     18.000
+             341.000      34.557       1.223      47.000    0.29%      19.000     25.000
+     SOCADJ2             100.911      -0.951      33.000    0.27%      94.000     99.000    101.062
+             372.000      94.777       6.384     132.000    0.27%     103.125    107.800
+     SOCADJ3             100.424      -0.024      51.857    0.30%      93.677     99.000    100.031
+             336.000      99.828       3.103     145.200    0.30%     102.000    107.556
+     SOCADJ4             100.599      -0.175      64.821    0.29%      95.000     99.000    100.222
+             345.000      75.783       2.439     133.138    0.29%     102.094    106.615
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       11
+
+Loglikelihood
+
+          H0 Value                       -6889.597
+          H0 Scaling Correction Factor      1.8078
+            for MLR
+          H1 Value                       -6845.291
+          H1 Scaling Correction Factor      1.5391
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                   13801.193
+          Bayesian (BIC)                 13844.707
+          Sample-Size Adjusted BIC       13809.806
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                             65.430*
+          Degrees of Freedom                    16
+          P-Value                           0.0000
+          Scaling Correction Factor         1.3543
+            for MLR
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.089
+          90 Percent C.I.                    0.068  0.113
+          Probability RMSEA <= .05           0.002
+
+CFI/TLI
+
+          CFI                                0.904
+          TLI                                0.910
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            529.596
+          Degrees of Freedom                    15
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.231
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ I1       BY
+    MOOD2              1.000      0.000    999.000    999.000
+    MOOD3              1.000      0.000    999.000    999.000
+    MOOD4              1.000      0.000    999.000    999.000
+
+ I2       BY
+    SOCADJ2            1.000      0.000    999.000    999.000
+    SOCADJ3            1.000      0.000    999.000    999.000
+    SOCADJ4            1.000      0.000    999.000    999.000
+
+ I2       WITH
+    I1               -21.903      2.890     -7.578      0.000
+
+ Means
+    I1                20.817      0.285     73.067      0.000
+    I2               100.430      0.441    227.562      0.000
+
+ Intercepts
+    MOOD2              0.000      0.000    999.000    999.000
+    MOOD3              0.000      0.000    999.000    999.000
+    MOOD4              0.000      0.000    999.000    999.000
+    SOCADJ2            0.000      0.000    999.000    999.000
+    SOCADJ3            0.000      0.000    999.000    999.000
+    SOCADJ4            0.000      0.000    999.000    999.000
+
+ Variances
+    I1                22.915      2.728      8.401      0.000
+    I2                58.551      8.460      6.921      0.000
+
+ Residual Variances
+    MOOD2             18.985      2.404      7.897      0.000
+    MOOD3             17.233      2.493      6.912      0.000
+    MOOD4             14.341      1.772      8.095      0.000
+    SOCADJ2           40.260      6.934      5.806      0.000
+    SOCADJ3           33.104      5.724      5.783      0.000
+    SOCADJ4           32.054      4.785      6.699      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.595E-03
+       (ratio of smallest to largest eigenvalue)
+
+
+MODEL MODIFICATION INDICES
+
+NOTE:  Modification indices for direct effects of observed dependent variables
+regressed on covariates may not be included.  To include these, request
+MODINDICES (ALL).
+
+Minimum M.I. value for printing the modification index    10.000
+
+                                   M.I.     E.P.C.  Std E.P.C.  StdYX E.P.C.
+
+BY Statements
+
+I1       BY MOOD4                 14.642    -0.056     -0.266       -0.044
+I2       BY MOOD4                 13.820    -0.011     -0.087       -0.014
+
+WITH Statements
+
+SOCADJ3  WITH MOOD3               15.192    -8.212     -8.212       -0.344
+
+Means/Intercepts/Thresholds
+
+[ MOOD4    ]                      14.147    -1.156     -1.156       -0.189
+
+
+PLOT INFORMATION
+
+The following plots are available:
+
+  Histograms (sample values)
+  Scatterplots (sample values)
+  Observed individual values
+
+     Beginning Time:  14:34:50
+        Ending Time:  14:34:50
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen
